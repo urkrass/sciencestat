@@ -42,6 +42,7 @@ function clamp(value: number, min: number, max: number) {
 
 export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
   const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [containerWidth, setContainerWidth] = useState(760);
   const [numPages, setNumPages] = useState<number | null>(null);
@@ -123,7 +124,7 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
         }
       },
       {
-        root: isFullscreen ? containerRef.current : null,
+        root: scrollAreaRef.current,
         threshold: [0.15, 0.35, 0.55, 0.75]
       }
     );
@@ -138,6 +139,10 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   }, [isFullscreen, numPages]);
 
   const pageWidth = useMemo(() => Math.round(containerWidth * scale), [containerWidth, scale]);
+  const pageFrameWidth = useMemo(
+    () => Math.max(pageWidth + 32, containerWidth),
+    [containerWidth, pageWidth]
+  );
   const totalPagesLabel = numPages ?? "...";
 
   const scrollToPage = (targetPage: number) => {
@@ -147,12 +152,16 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
 
     const nextPage = clamp(targetPage, 1, numPages);
     const nextPageElement = pageRefs.current[nextPage - 1];
+    const scrollArea = scrollAreaRef.current;
 
     setPageNumber(nextPage);
-    nextPageElement?.scrollIntoView({
-      behavior: "smooth",
-      block: "start"
-    });
+
+    if (nextPageElement && scrollArea) {
+      scrollArea.scrollTo({
+        left: nextPageElement.offsetLeft,
+        behavior: "smooth"
+      });
+    }
   };
 
   const goToPreviousPage = () => {
@@ -161,6 +170,17 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
 
   const goToNextPage = () => {
     scrollToPage(pageNumber + 1);
+  };
+
+  const handleReaderWheel = (event: React.WheelEvent<HTMLDivElement>) => {
+    const scrollArea = scrollAreaRef.current;
+
+    if (!scrollArea || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+      return;
+    }
+
+    event.preventDefault();
+    scrollArea.scrollLeft += event.deltaY;
   };
 
   const toggleFullscreen = async () => {
@@ -276,7 +296,11 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
       {loadError ? (
         <ViewerStatus>{loadError}</ViewerStatus>
       ) : (
-        <div className="pdf-page mt-4 max-w-full overflow-x-auto rounded-md bg-slate-100 px-3 py-6 text-center">
+        <div
+          ref={scrollAreaRef}
+          onWheel={handleReaderWheel}
+          className="pdf-page pdf-page-book mt-4 max-w-full rounded-md bg-slate-100 px-3 py-6 text-center"
+        >
           <Document
             file={file}
             loading={<ViewerStatus>Loading page...</ViewerStatus>}
@@ -288,7 +312,7 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
               setPageNumber((currentPage) => clamp(currentPage, 1, loadedPages));
             }}
           >
-            <div className="pdf-page-stack">
+            <div className="pdf-page-strip">
               {Array.from({ length: numPages ?? 0 }, (_, index) => {
                 const renderedPageNumber = index + 1;
 
@@ -300,6 +324,7 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
                     }}
                     data-page-number={renderedPageNumber}
                     className="pdf-page-frame"
+                    style={{ width: pageFrameWidth }}
                   >
                     <p className="pdf-page-label">
                       Page {renderedPageNumber} of {totalPagesLabel}

@@ -47,15 +47,30 @@ a,
   display: inline-block;
 }
 
-.pdf-page-stack {
+.pdf-page-book {
+  overflow-x: auto;
+  overflow-y: hidden;
+  overscroll-behavior-inline: contain;
+  scroll-behavior: smooth;
+  scroll-snap-type: x mandatory;
+  scrollbar-color: #94a3b8 #e2e8f0;
+}
+
+.pdf-page-strip {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
   align-items: center;
+  width: max-content;
   gap: 2rem;
 }
 
 .pdf-page-frame {
-  scroll-margin-top: 1rem;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  align-items: center;
+  scroll-snap-align: center;
+  scroll-snap-stop: always;
 }
 
 .pdf-page-label {
@@ -102,6 +117,10 @@ a,
 .pdf-viewer-shell:fullscreen .pdf-page {
   min-height: calc(100vh - 7rem);
   background: #0f172a;
+}
+
+.pdf-viewer-shell:fullscreen .pdf-page-strip {
+  min-height: calc(100vh - 10rem);
 }
 
 .pdf-viewer-shell:fullscreen .pdf-page-label {
