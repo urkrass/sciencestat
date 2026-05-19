@@ -28,6 +28,13 @@ type ViewerStatusProps = {
   children: React.ReactNode;
 };
 
+type PageTurn = {
+  direction: "next" | "previous";
+  fromPage: number;
+  id: number;
+  toPage: number;
+};
+
 function ViewerStatus({ children }: ViewerStatusProps) {
   return (
     <div className="flex min-h-[22rem] items-center justify-center rounded-lg border border-dashed border-line bg-white p-8 text-center text-sm text-slate-600">
@@ -42,11 +49,12 @@ function clamp(value: number, min: number, max: number) {
 
 export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
-  const scrollAreaRef = useRef<HTMLDivElement>(null);
-  const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
+  const wheelDeltaRef = useRef(0);
+  const touchStartXRef = useRef<number | null>(null);
   const [containerWidth, setContainerWidth] = useState(760);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
+  const [pageTurn, setPageTurn] = useState<PageTurn | null>(null);
   const [scale, setScale] = useState(1);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [fullscreenError, setFullscreenError] = useState<string | null>(null);
@@ -86,101 +94,95 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   }, []);
 
   useEffect(() => {
-    if (!numPages) {
-      return;
-    }
-
-    pageRefs.current = pageRefs.current.slice(0, numPages);
-  }, [numPages]);
-
-  useEffect(() => {
-    if (!numPages) {
-      return;
-    }
-
-    const visibleRatios = new Map<number, number>();
-    const observer = new IntersectionObserver(
-      (entries) => {
-        entries.forEach((entry) => {
-          const page = Number((entry.target as HTMLElement).dataset.pageNumber);
-
-          if (!Number.isNaN(page)) {
-            visibleRatios.set(page, entry.isIntersecting ? entry.intersectionRatio : 0);
-          }
-        });
-
-        let mostVisiblePage: number | null = null;
-        let strongestRatio = 0;
-
-        visibleRatios.forEach((ratio, page) => {
-          if (ratio > strongestRatio) {
-            strongestRatio = ratio;
-            mostVisiblePage = page;
-          }
-        });
-
-        if (mostVisiblePage) {
-          setPageNumber(mostVisiblePage);
-        }
-      },
-      {
-        root: scrollAreaRef.current,
-        threshold: [0.15, 0.35, 0.55, 0.75]
-      }
-    );
-
-    pageRefs.current.forEach((pageElement) => {
-      if (pageElement) {
-        observer.observe(pageElement);
-      }
-    });
-
-    return () => observer.disconnect();
-  }, [isFullscreen, numPages]);
+    setPageNumber(1);
+    setPageTurn(null);
+  }, [file]);
 
   const pageWidth = useMemo(() => Math.round(containerWidth * scale), [containerWidth, scale]);
-  const pageFrameWidth = useMemo(
-    () => Math.max(pageWidth + 32, containerWidth),
-    [containerWidth, pageWidth]
-  );
+  const displayPageNumber = pageTurn?.toPage ?? pageNumber;
   const totalPagesLabel = numPages ?? "...";
 
-  const scrollToPage = (targetPage: number) => {
-    if (!numPages) {
+  const startPageTurn = (targetPage: number, direction: PageTurn["direction"]) => {
+    if (!numPages || pageTurn) {
       return;
     }
 
     const nextPage = clamp(targetPage, 1, numPages);
-    const nextPageElement = pageRefs.current[nextPage - 1];
-    const scrollArea = scrollAreaRef.current;
 
-    setPageNumber(nextPage);
-
-    if (nextPageElement && scrollArea) {
-      scrollArea.scrollTo({
-        left: nextPageElement.offsetLeft,
-        behavior: "smooth"
-      });
+    if (nextPage === pageNumber) {
+      return;
     }
+
+    setPageTurn({
+      direction,
+      fromPage: pageNumber,
+      id: Date.now(),
+      toPage: nextPage
+    });
   };
 
   const goToPreviousPage = () => {
-    scrollToPage(pageNumber - 1);
+    startPageTurn(pageNumber - 1, "previous");
   };
 
   const goToNextPage = () => {
-    scrollToPage(pageNumber + 1);
+    startPageTurn(pageNumber + 1, "next");
   };
 
   const handleReaderWheel = (event: React.WheelEvent<HTMLDivElement>) => {
-    const scrollArea = scrollAreaRef.current;
-
-    if (!scrollArea || Math.abs(event.deltaY) <= Math.abs(event.deltaX)) {
+    if (pageTurn) {
+      event.preventDefault();
       return;
     }
 
     event.preventDefault();
-    scrollArea.scrollLeft += event.deltaY;
+    wheelDeltaRef.current +=
+      Math.abs(event.deltaY) >= Math.abs(event.deltaX) ? event.deltaY : event.deltaX;
+
+    if (Math.abs(wheelDeltaRef.current) < 90) {
+      return;
+    }
+
+    if (wheelDeltaRef.current > 0) {
+      goToNextPage();
+    } else {
+      goToPreviousPage();
+    }
+
+    wheelDeltaRef.current = 0;
+  };
+
+  const handleReaderKeyDown = (event: React.KeyboardEvent<HTMLDivElement>) => {
+    if (event.key === "ArrowRight" || event.key === "PageDown") {
+      event.preventDefault();
+      goToNextPage();
+    }
+
+    if (event.key === "ArrowLeft" || event.key === "PageUp") {
+      event.preventDefault();
+      goToPreviousPage();
+    }
+  };
+
+  const handleTouchStart = (event: React.TouchEvent<HTMLDivElement>) => {
+    touchStartXRef.current = event.touches[0]?.clientX ?? null;
+  };
+
+  const handleTouchEnd = (event: React.TouchEvent<HTMLDivElement>) => {
+    const startX = touchStartXRef.current;
+    const endX = event.changedTouches[0]?.clientX;
+
+    touchStartXRef.current = null;
+
+    if (startX === null || endX === undefined || Math.abs(startX - endX) < 45) {
+      return;
+    }
+
+    if (startX > endX) {
+      goToNextPage();
+    } else {
+      goToPreviousPage();
+    }
   };
 
   const toggleFullscreen = async () => {
@@ -209,6 +211,15 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     }
   };
 
+  const finishPageTurn = () => {
+    if (!pageTurn) {
+      return;
+    }
+
+    setPageNumber(pageTurn.toPage);
+    setPageTurn(null);
+  };
+
   return (
     <section
       ref={containerRef}
@@ -219,14 +230,14 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
         <div>
           <h2 className="text-base font-semibold text-ink">Reader</h2>
           <p className="text-sm text-slate-500">
-            Page {pageNumber} / {totalPagesLabel}
+            Page {displayPageNumber} / {totalPagesLabel}
           </p>
         </div>
         <div className="flex flex-wrap gap-2">
           <button
             type="button"
             onClick={goToPreviousPage}
-            disabled={pageNumber <= 1}
+            disabled={pageNumber <= 1 || Boolean(pageTurn)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink transition hover:border-moss hover:text-moss disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             aria-label="Previous page"
             title="Previous page"
@@ -236,7 +247,7 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
           <button
             type="button"
             onClick={goToNextPage}
-            disabled={!numPages || pageNumber >= numPages}
+            disabled={!numPages || pageNumber >= numPages || Boolean(pageTurn)}
             className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink transition hover:border-moss hover:text-moss disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             aria-label="Next page"
             title="Next page"
@@ -297,9 +308,12 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
         <ViewerStatus>{loadError}</ViewerStatus>
       ) : (
         <div
-          ref={scrollAreaRef}
           onWheel={handleReaderWheel}
+          onKeyDown={handleReaderKeyDown}
+          onTouchEnd={handleTouchEnd}
+          onTouchStart={handleTouchStart}
           className="pdf-page pdf-page-book mt-4 max-w-full rounded-md bg-slate-100 px-3 py-6 text-center"
+          tabIndex={0}
         >
           <Document
             file={file}
@@ -312,32 +326,50 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
               setPageNumber((currentPage) => clamp(currentPage, 1, loadedPages));
             }}
           >
-            <div className="pdf-page-strip">
-              {Array.from({ length: numPages ?? 0 }, (_, index) => {
-                const renderedPageNumber = index + 1;
+            <div className="pdf-book-stage" style={{ width: pageWidth }}>
+              <p className="pdf-page-label">
+                Page {displayPageNumber} of {totalPagesLabel}
+              </p>
+              <div className="pdf-book-page-space">
+                <div className="pdf-book-page pdf-book-page-stationary">
+                  <Page
+                    key={`${file}-stationary-${displayPageNumber}-${pageWidth}`}
+                    pageNumber={displayPageNumber}
+                    width={pageWidth}
+                    renderAnnotationLayer
+                    renderTextLayer
+                  />
+                </div>
 
-                return (
+                {pageTurn ? (
                   <div
-                    key={`${file}-${renderedPageNumber}-${pageWidth}`}
-                    ref={(element) => {
-                      pageRefs.current[index] = element;
-                    }}
-                    data-page-number={renderedPageNumber}
-                    className="pdf-page-frame"
-                    style={{ width: pageFrameWidth }}
+                    key={pageTurn.id}
+                    className={`pdf-book-turn-sheet pdf-book-turn-sheet-${pageTurn.direction}`}
+                    onAnimationEnd={finishPageTurn}
                   >
-                    <p className="pdf-page-label">
-                      Page {renderedPageNumber} of {totalPagesLabel}
-                    </p>
-                    <Page
-                      pageNumber={renderedPageNumber}
-                      width={pageWidth}
-                      renderAnnotationLayer
-                      renderTextLayer
-                    />
+                    <div className="pdf-book-turn-face pdf-book-turn-front">
+                      <Page
+                        pageNumber={
+                          pageTurn.direction === "next" ? pageTurn.fromPage : pageTurn.toPage
+                        }
+                        width={pageWidth}
+                        renderAnnotationLayer={false}
+                        renderTextLayer={false}
+                      />
+                    </div>
+                    <div className="pdf-book-turn-face pdf-book-turn-back">
+                      <Page
+                        pageNumber={
+                          pageTurn.direction === "next" ? pageTurn.toPage : pageTurn.fromPage
+                        }
+                        width={pageWidth}
+                        renderAnnotationLayer={false}
+                        renderTextLayer={false}
+                      />
+                    </div>
                   </div>
-                );
-              })}
+                ) : null}
+              </div>
             </div>
           </Document>
         </div>
