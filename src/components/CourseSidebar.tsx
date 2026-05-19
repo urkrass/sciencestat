@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowLeft, ArrowRight, Download, ExternalLink, FileText } from "lucide-react";
+import { PomodoroTimer } from "@/components/PomodoroTimer";
 import { statisticsUnits, type StatisticsUnit } from "@/content/statisticsUnits";
 
 type CourseSidebarProps = {
@@ -161,6 +162,7 @@ export function CourseSidebar({
           );
         })}
       </ol>
+      {isUnitWorkspace ? <PomodoroTimer /> : null}
     </aside>
   );
 }
