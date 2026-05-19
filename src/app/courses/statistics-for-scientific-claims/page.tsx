@@ -1,4 +1,6 @@
 import type { Metadata } from "next";
+import Link from "next/link";
+import { ArrowRight } from "lucide-react";
 import { CourseSidebar } from "@/components/CourseSidebar";
 import { UnitCard } from "@/components/UnitCard";
 import { statisticsUnits } from "@/content/statisticsUnits";
@@ -26,6 +28,15 @@ export default function CoursePage() {
             Lecture notes for IB DP Biology and Chemistry: eleven printable units on
             statistical evidence, uncertainty, and defensible conclusions.
           </p>
+        </div>
+        <div className="mt-3">
+          <Link
+            href="/courses/statistics-for-scientific-claims/simulations"
+            className="inline-flex h-9 items-center justify-center gap-2 rounded-md border border-moss bg-white px-3 text-sm font-medium text-moss transition hover:bg-moss hover:text-white"
+          >
+            Statistical simulations
+            <ArrowRight aria-hidden="true" className="h-4 w-4" />
+          </Link>
         </div>
       </section>
 
