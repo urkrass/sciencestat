@@ -53,9 +53,27 @@ a,
 }
 
 .pdf-page-book {
+  position: relative;
   overflow: hidden;
   outline: none;
   touch-action: pan-y;
+}
+
+.pdf-page-book-magnifying {
+  cursor: crosshair;
+}
+
+.pdf-magnifier-lens {
+  position: absolute;
+  z-index: 40;
+  border: 3px solid #ffffff;
+  border-radius: 9999px;
+  background: #ffffff;
+  box-shadow:
+    0 22px 60px rgba(15, 23, 42, 0.32),
+    inset 0 0 0 1px rgba(23, 32, 51, 0.18);
+  pointer-events: none;
+  transition: opacity 120ms ease;
 }
 
 .pdf-flipbook {

@@ -6,9 +6,7 @@ import {
   ChevronRight,
   Maximize2,
   Minimize2,
-  RotateCcw,
-  ZoomIn,
-  ZoomOut
+  Search
 } from "lucide-react";
 import HTMLFlipBook from "react-pageflip";
 import { Document, Page, pdfjs } from "react-pdf";
@@ -64,20 +62,29 @@ type ReaderSize = {
   width: number;
 };
 
+const magnifierSize = 190;
+const magnifierScale = 2.25;
+
 export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<HTMLDivElement>(null);
+  const magnifierCanvasRef = useRef<HTMLCanvasElement>(null);
   const flipBookRef = useRef<FlipBookRef | null>(null);
   const wheelDeltaRef = useRef(0);
   const [containerWidth, setContainerWidth] = useState(760);
   const [readerSize, setReaderSize] = useState<ReaderSize>({ height: 0, width: 0 });
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
-  const [scale, setScale] = useState(1);
   const [pageAspectRatio, setPageAspectRatio] = useState(1.414);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [fullscreenError, setFullscreenError] = useState<string | null>(null);
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const [isMagnifierEnabled, setIsMagnifierEnabled] = useState(false);
+  const [magnifierPosition, setMagnifierPosition] = useState({
+    left: 0,
+    top: 0,
+    visible: false
+  });
 
   useEffect(() => {
     const node = containerRef.current;
@@ -155,11 +162,11 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     const minPageWidth = isFullscreen ? 160 : 240;
 
     return clamp(
-      Math.floor(Math.min(availablePageWidth * scale, availablePageHeight, maxPageWidth)),
+      Math.floor(Math.min(availablePageWidth, availablePageHeight, maxPageWidth)),
       minPageWidth,
       maxPageWidth
     );
-  }, [isFullscreen, pageAspectRatio, readerSize.height, readerWidth, scale, shouldUsePortrait]);
+  }, [isFullscreen, pageAspectRatio, readerSize.height, readerWidth, shouldUsePortrait]);
 
   const pageHeight = useMemo(
     () => Math.max(320, Math.round(basePageWidth * pageAspectRatio)),
@@ -227,6 +234,92 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     }
   };
 
+  const hideMagnifier = () => {
+    setMagnifierPosition((currentPosition) => ({
+      ...currentPosition,
+      visible: false
+    }));
+  };
+
+  const handleReaderPointerMove = (event: React.PointerEvent<HTMLDivElement>) => {
+    if (!isMagnifierEnabled) {
+      return;
+    }
+
+    const reader = readerRef.current;
+    const lensCanvas = magnifierCanvasRef.current;
+
+    if (!reader || !lensCanvas) {
+      return;
+    }
+
+    const sourceCanvas = document
+      .elementsFromPoint(event.clientX, event.clientY)
+      .find(
+        (element): element is HTMLCanvasElement =>
+          element instanceof HTMLCanvasElement && Boolean(element.closest(".pdf-flipbook"))
+      );
+
+    if (!sourceCanvas) {
+      hideMagnifier();
+      return;
+    }
+
+    const readerRect = reader.getBoundingClientRect();
+    const sourceRect = sourceCanvas.getBoundingClientRect();
+
+    if (sourceRect.width <= 0 || sourceRect.height <= 0) {
+      hideMagnifier();
+      return;
+    }
+
+    const devicePixelRatio = window.devicePixelRatio || 1;
+    const lensPixelSize = Math.round(magnifierSize * devicePixelRatio);
+
+    if (lensCanvas.width !== lensPixelSize || lensCanvas.height !== lensPixelSize) {
+      lensCanvas.width = lensPixelSize;
+      lensCanvas.height = lensPixelSize;
+    }
+
+    const sourceScaleX = sourceCanvas.width / sourceRect.width;
+    const sourceScaleY = sourceCanvas.height / sourceRect.height;
+    const pointerX = (event.clientX - sourceRect.left) * sourceScaleX;
+    const pointerY = (event.clientY - sourceRect.top) * sourceScaleY;
+    const sourceWidth = (magnifierSize / magnifierScale) * sourceScaleX;
+    const sourceHeight = (magnifierSize / magnifierScale) * sourceScaleY;
+    const sourceX = clamp(pointerX - sourceWidth / 2, 0, sourceCanvas.width - sourceWidth);
+    const sourceY = clamp(pointerY - sourceHeight / 2, 0, sourceCanvas.height - sourceHeight);
+    const context = lensCanvas.getContext("2d");
+
+    if (!context) {
+      return;
+    }
+
+    context.clearRect(0, 0, lensCanvas.width, lensCanvas.height);
+    context.imageSmoothingEnabled = true;
+    context.imageSmoothingQuality = "high";
+    context.drawImage(
+      sourceCanvas,
+      sourceX,
+      sourceY,
+      sourceWidth,
+      sourceHeight,
+      0,
+      0,
+      lensCanvas.width,
+      lensCanvas.height
+    );
+
+    const maxLensLeft = Math.max(8, readerRect.width - magnifierSize - 8);
+    const maxLensTop = Math.max(8, readerRect.height - magnifierSize - 8);
+
+    setMagnifierPosition({
+      left: clamp(event.clientX - readerRect.left - magnifierSize / 2, 8, maxLensLeft),
+      top: clamp(event.clientY - readerRect.top - magnifierSize / 2, 8, maxLensTop),
+      visible: true
+    });
+  };
+
   const toggleFullscreen = async () => {
     const node = containerRef.current;
 
@@ -290,30 +383,23 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
           <span className="mx-1 hidden h-10 w-px bg-line sm:block" />
           <button
             type="button"
-            onClick={() => setScale((currentScale) => clamp(currentScale - 0.15, 0.7, 1.6))}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink transition hover:border-moss hover:text-moss"
-            aria-label="Zoom out"
-            title="Zoom out"
+            onClick={() => {
+              setIsMagnifierEnabled((enabled) => !enabled);
+              hideMagnifier();
+            }}
+            aria-pressed={isMagnifierEnabled}
+            className={[
+              "inline-flex h-10 w-10 items-center justify-center rounded-md border transition",
+              isMagnifierEnabled
+                ? "border-moss bg-moss text-white hover:bg-moss-dark"
+                : "border-line text-ink hover:border-moss hover:text-moss"
+            ].join(" ")}
+            aria-label={
+              isMagnifierEnabled ? "Disable magnifying glass" : "Enable magnifying glass"
+            }
+            title={isMagnifierEnabled ? "Disable magnifying glass" : "Enable magnifying glass"}
           >
-            <ZoomOut aria-hidden="true" className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setScale(1)}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink transition hover:border-moss hover:text-moss"
-            aria-label="Reset zoom"
-            title="Reset zoom"
-          >
-            <RotateCcw aria-hidden="true" className="h-4 w-4" />
-          </button>
-          <button
-            type="button"
-            onClick={() => setScale((currentScale) => clamp(currentScale + 0.15, 0.7, 1.6))}
-            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink transition hover:border-moss hover:text-moss"
-            aria-label="Zoom in"
-            title="Zoom in"
-          >
-            <ZoomIn aria-hidden="true" className="h-4 w-4" />
+            <Search aria-hidden="true" className="h-4 w-4" />
           </button>
           <span className="mx-1 hidden h-10 w-px bg-line sm:block" />
           <button
@@ -343,7 +429,12 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
         <div
           ref={readerRef}
           onKeyDown={handleReaderKeyDown}
-          className="pdf-page pdf-page-book mt-4 max-w-full rounded-md bg-slate-100 px-3 py-6 text-center"
+          onPointerLeave={hideMagnifier}
+          onPointerMove={handleReaderPointerMove}
+          className={[
+            "pdf-page pdf-page-book mt-4 max-w-full rounded-md bg-slate-100 px-3 py-6 text-center",
+            isMagnifierEnabled ? "pdf-page-book-magnifying" : ""
+          ].join(" ")}
           tabIndex={0}
         >
           <Document
@@ -384,7 +475,7 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
                 startZIndex={0}
                 style={{ margin: "0 auto" }}
                 swipeDistance={36}
-                useMouseEvents
+                useMouseEvents={!isMagnifierEnabled}
                 usePortrait={shouldUsePortrait}
                 width={basePageWidth}
               >
@@ -419,6 +510,20 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
               </HTMLFlipBook>
             ) : null}
           </Document>
+          {isMagnifierEnabled ? (
+            <canvas
+              ref={magnifierCanvasRef}
+              aria-hidden="true"
+              className="pdf-magnifier-lens"
+              style={{
+                height: magnifierSize,
+                left: magnifierPosition.left,
+                opacity: magnifierPosition.visible ? 1 : 0,
+                top: magnifierPosition.top,
+                width: magnifierSize
+              }}
+            />
+          ) : null}
         </div>
       )}
     </section>
