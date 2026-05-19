@@ -1,5 +1,12 @@
 import Link from "next/link";
-import { ArrowLeft, ArrowRight, Download, ExternalLink, FileText } from "lucide-react";
+import {
+  Activity,
+  ArrowLeft,
+  ArrowRight,
+  Download,
+  ExternalLink,
+  FileText
+} from "lucide-react";
 import { PomodoroTimer } from "@/components/PomodoroTimer";
 import { statisticsUnits, type StatisticsUnit } from "@/content/statisticsUnits";
 
@@ -108,10 +115,22 @@ export function CourseSidebar({
           </div>
         </div>
       ) : null}
+      <nav
+        aria-label="Course tools"
+        className={["shrink-0", activeUnit ? "mt-3" : ""].join(" ")}
+      >
+        <Link
+          href="/courses/statistics-for-scientific-claims/simulations"
+          className="flex h-9 items-center justify-center gap-2 rounded-md border border-line bg-paper px-3 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
+        >
+          <Activity aria-hidden="true" className="h-4 w-4" />
+          Simulations
+        </Link>
+      </nav>
       <h2
         className={[
           "shrink-0 text-sm font-semibold uppercase tracking-[0.14em] text-moss",
-          activeUnit ? "mt-4" : ""
+          "mt-4"
         ].join(" ")}
       >
         Units
