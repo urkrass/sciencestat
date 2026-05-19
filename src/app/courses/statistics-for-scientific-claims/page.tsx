@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 
 export default function CoursePage() {
   return (
-    <main className="mx-auto flex h-dvh w-full max-w-7xl flex-col overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+    <main className="mx-auto h-dvh w-full max-w-7xl overflow-y-auto overflow-x-hidden px-4 py-4 sm:px-6 lg:px-8">
       <section className="shrink-0 border-b border-line pb-3">
         <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
           <div>
@@ -29,11 +29,11 @@ export default function CoursePage() {
         </div>
       </section>
 
-      <div className="grid min-h-0 flex-1 gap-4 py-4 lg:grid-cols-[18rem_1fr]">
+      <div className="grid gap-4 py-4 lg:grid-cols-[18rem_1fr]">
         <CourseSidebar />
         <section
           aria-label="Course units"
-          className="grid min-h-0 gap-3 md:grid-cols-2 xl:grid-cols-3"
+          className="grid gap-3 md:grid-cols-2 xl:grid-cols-3"
         >
           {statisticsUnits.map((unit) => (
             <UnitCard key={unit.slug} unit={unit} />

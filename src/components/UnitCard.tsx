@@ -15,13 +15,13 @@ export function UnitCard({ unit }: UnitCardProps) {
   const hasExercises = Boolean(getExerciseSetForUnit(unit.slug));
 
   return (
-    <article className="flex min-h-0 flex-col rounded-lg border border-line bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-sheet">
+    <article className="flex min-h-[10.75rem] flex-col overflow-hidden rounded-lg border border-line bg-white p-4 shadow-sm transition hover:-translate-y-0.5 hover:shadow-sheet">
       <div className="flex items-start justify-between gap-3">
         <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
             Unit {String(unit.number).padStart(2, "0")}
           </p>
-          <h2 className="mt-1 text-base font-semibold leading-snug text-ink">
+          <h2 className="unit-card-title mt-1 text-base font-semibold text-ink">
             {unit.title}
           </h2>
           {hasExercises ? (
@@ -31,7 +31,7 @@ export function UnitCard({ unit }: UnitCardProps) {
           ) : null}
         </div>
       </div>
-      <p className="mt-2 max-h-[2.75rem] overflow-hidden text-xs leading-5 text-slate-600">
+      <p className="unit-card-description mt-2 text-xs leading-5 text-slate-600">
         {unit.description}
       </p>
       <div className="mt-auto flex flex-wrap gap-2 pt-3">
