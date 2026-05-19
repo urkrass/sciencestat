@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
-import { ArrowLeft, ArrowRight, Download, ExternalLink, FileText } from "lucide-react";
+import { ArrowLeft, ArrowRight } from "lucide-react";
 import { CourseSidebar } from "@/components/CourseSidebar";
 import { UnitWorkspace } from "@/components/UnitWorkspace";
 import { getExerciseSetForUnit } from "@/content/exercises";
@@ -16,9 +16,6 @@ type UnitPageProps = {
     slug: string;
   }>;
 };
-
-const baseButtonClass =
-  "inline-flex h-9 items-center justify-center gap-2 rounded-md border px-3 text-sm font-medium transition";
 
 export function generateStaticParams() {
   return statisticsUnits.map((unit) => ({
@@ -56,71 +53,13 @@ export default async function UnitPage({ params }: UnitPageProps) {
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-6 sm:px-6 lg:px-8">
       <div className="grid gap-6 lg:grid-cols-[18rem_1fr]">
-        <CourseSidebar activeSlug={unit.slug} />
-        <div className="min-w-0 space-y-5">
-          <section className="border-b border-line pb-4">
-            <div className="flex flex-col gap-4 xl:flex-row xl:items-end xl:justify-between">
-              <div className="min-w-0">
-                <div className="flex flex-wrap items-center gap-x-3 gap-y-1">
-                  <p className="text-xs font-semibold uppercase tracking-[0.16em] text-moss">
-                    Unit {String(unit.number).padStart(2, "0")}
-                  </p>
-                  <Link
-                    href="/courses/statistics-for-scientific-claims"
-                    className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-moss"
-                  >
-                    <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-                    Back to course
-                  </Link>
-                </div>
-                <h1 className="heading-serif mt-2 text-2xl font-semibold leading-tight text-ink sm:text-3xl">
-                  {unit.title}
-                </h1>
-                <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
-                  {unit.description}
-                </p>
-              </div>
-              <div className="flex shrink-0 flex-wrap gap-2 xl:justify-end">
-                <a
-                  href={unit.pdfPath}
-                  download
-                  className={`${baseButtonClass} border-moss bg-moss text-white hover:bg-moss-dark`}
-                >
-                  <Download aria-hidden="true" className="h-4 w-4" />
-                  Download PDF
-                </a>
-                {unit.hasTex ? (
-                  <a
-                    href={unit.texPath}
-                    download
-                    className={`${baseButtonClass} border-line bg-white text-ink hover:border-moss hover:text-moss`}
-                  >
-                    <FileText aria-hidden="true" className="h-4 w-4" />
-                    Download LaTeX source
-                  </a>
-                ) : (
-                  <span
-                    aria-disabled="true"
-                    role="link"
-                    title="LaTeX source file was not found in this workspace."
-                    className={`${baseButtonClass} cursor-not-allowed border-line bg-slate-100 text-slate-400`}
-                  >
-                    <FileText aria-hidden="true" className="h-4 w-4" />
-                    Download LaTeX source
-                  </span>
-                )}
-                <a
-                  href={unit.pdfPath}
-                  target="_blank"
-                  rel="noreferrer"
-                  className={`${baseButtonClass} border-line bg-white text-ink hover:border-moss hover:text-moss`}
-                >
-                  <ExternalLink aria-hidden="true" className="h-4 w-4" />
-                  Open PDF in new tab
-                </a>
-              </div>
-            </div>
-          </section>
+        <div className="min-w-0 space-y-5 lg:col-start-2 lg:row-start-1">
+          <div className="sr-only">
+            <h1>
+              Unit {String(unit.number).padStart(2, "0")}: {unit.title}
+            </h1>
+            <p>{unit.description}</p>
+          </div>
 
           <UnitWorkspace
             exerciseSet={exerciseSet}
@@ -169,6 +108,9 @@ export default async function UnitPage({ params }: UnitPageProps) {
               </span>
             )}
           </nav>
+        </div>
+        <div className="lg:col-start-1 lg:row-start-1">
+          <CourseSidebar activeSlug={unit.slug} activeUnit={unit} />
         </div>
       </div>
     </main>
