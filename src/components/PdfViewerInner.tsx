@@ -42,6 +42,7 @@ function clamp(value: number, min: number, max: number) {
 
 export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const pageRefs = useRef<Array<HTMLDivElement | null>>([]);
   const [containerWidth, setContainerWidth] = useState(760);
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
@@ -83,17 +84,83 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     };
   }, []);
 
+  useEffect(() => {
+    if (!numPages) {
+      return;
+    }
+
+    pageRefs.current = pageRefs.current.slice(0, numPages);
+  }, [numPages]);
+
+  useEffect(() => {
+    if (!numPages) {
+      return;
+    }
+
+    const visibleRatios = new Map<number, number>();
+    const observer = new IntersectionObserver(
+      (entries) => {
+        entries.forEach((entry) => {
+          const page = Number((entry.target as HTMLElement).dataset.pageNumber);
+
+          if (!Number.isNaN(page)) {
+            visibleRatios.set(page, entry.isIntersecting ? entry.intersectionRatio : 0);
+          }
+        });
+
+        let mostVisiblePage: number | null = null;
+        let strongestRatio = 0;
+
+        visibleRatios.forEach((ratio, page) => {
+          if (ratio > strongestRatio) {
+            strongestRatio = ratio;
+            mostVisiblePage = page;
+          }
+        });
+
+        if (mostVisiblePage) {
+          setPageNumber(mostVisiblePage);
+        }
+      },
+      {
+        root: isFullscreen ? containerRef.current : null,
+        threshold: [0.15, 0.35, 0.55, 0.75]
+      }
+    );
+
+    pageRefs.current.forEach((pageElement) => {
+      if (pageElement) {
+        observer.observe(pageElement);
+      }
+    });
+
+    return () => observer.disconnect();
+  }, [isFullscreen, numPages]);
+
   const pageWidth = useMemo(() => Math.round(containerWidth * scale), [containerWidth, scale]);
   const totalPagesLabel = numPages ?? "...";
 
+  const scrollToPage = (targetPage: number) => {
+    if (!numPages) {
+      return;
+    }
+
+    const nextPage = clamp(targetPage, 1, numPages);
+    const nextPageElement = pageRefs.current[nextPage - 1];
+
+    setPageNumber(nextPage);
+    nextPageElement?.scrollIntoView({
+      behavior: "smooth",
+      block: "start"
+    });
+  };
+
   const goToPreviousPage = () => {
-    setPageNumber((currentPage) => Math.max(1, currentPage - 1));
+    scrollToPage(pageNumber - 1);
   };
 
   const goToNextPage = () => {
-    setPageNumber((currentPage) =>
-      numPages ? Math.min(numPages, currentPage + 1) : currentPage
-    );
+    scrollToPage(pageNumber + 1);
   };
 
   const toggleFullscreen = async () => {
@@ -221,13 +288,32 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
               setPageNumber((currentPage) => clamp(currentPage, 1, loadedPages));
             }}
           >
-            <Page
-              key={`${file}-${pageNumber}-${pageWidth}`}
-              pageNumber={pageNumber}
-              width={pageWidth}
-              renderAnnotationLayer
-              renderTextLayer
-            />
+            <div className="pdf-page-stack">
+              {Array.from({ length: numPages ?? 0 }, (_, index) => {
+                const renderedPageNumber = index + 1;
+
+                return (
+                  <div
+                    key={`${file}-${renderedPageNumber}-${pageWidth}`}
+                    ref={(element) => {
+                      pageRefs.current[index] = element;
+                    }}
+                    data-page-number={renderedPageNumber}
+                    className="pdf-page-frame"
+                  >
+                    <p className="pdf-page-label">
+                      Page {renderedPageNumber} of {totalPagesLabel}
+                    </p>
+                    <Page
+                      pageNumber={renderedPageNumber}
+                      width={pageWidth}
+                      renderAnnotationLayer
+                      renderTextLayer
+                    />
+                  </div>
+                );
+              })}
+            </div>
           </Document>
         </div>
       )}

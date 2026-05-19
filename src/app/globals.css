@@ -47,6 +47,26 @@ a,
   display: inline-block;
 }
 
+.pdf-page-stack {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2rem;
+}
+
+.pdf-page-frame {
+  scroll-margin-top: 1rem;
+}
+
+.pdf-page-label {
+  margin: 0 0 0.65rem;
+  color: #64748b;
+  font-size: 0.78rem;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
 .pdf-page .react-pdf__Page canvas {
   display: block;
   height: auto !important;
@@ -82,4 +102,8 @@ a,
 .pdf-viewer-shell:fullscreen .pdf-page {
   min-height: calc(100vh - 7rem);
   background: #0f172a;
+}
+
+.pdf-viewer-shell:fullscreen .pdf-page-label {
+  color: #cbd5e1;
 }
