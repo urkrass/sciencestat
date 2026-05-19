@@ -1,7 +1,15 @@
 "use client";
 
 import { useEffect, useMemo, useRef, useState } from "react";
-import { ChevronLeft, ChevronRight, RotateCcw, ZoomIn, ZoomOut } from "lucide-react";
+import {
+  ChevronLeft,
+  ChevronRight,
+  Maximize2,
+  Minimize2,
+  RotateCcw,
+  ZoomIn,
+  ZoomOut
+} from "lucide-react";
 import { Document, Page, pdfjs } from "react-pdf";
 import "react-pdf/dist/Page/AnnotationLayer.css";
 import "react-pdf/dist/Page/TextLayer.css";
@@ -39,6 +47,8 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);
   const [loadError, setLoadError] = useState<string | null>(null);
+  const [fullscreenError, setFullscreenError] = useState<string | null>(null);
+  const [isFullscreen, setIsFullscreen] = useState(false);
 
   useEffect(() => {
     const node = containerRef.current;
@@ -48,7 +58,9 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
 
     const updateWidth = () => {
       const nextWidth = Math.floor(node.getBoundingClientRect().width);
-      setContainerWidth(clamp(nextWidth - 24, 280, 900));
+      const horizontalPadding = isFullscreen ? 32 : 24;
+      const maxWidth = isFullscreen ? 1220 : 900;
+      setContainerWidth(clamp(nextWidth - horizontalPadding, 280, maxWidth));
     };
 
     updateWidth();
@@ -57,6 +69,18 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     observer.observe(node);
 
     return () => observer.disconnect();
+  }, [isFullscreen]);
+
+  useEffect(() => {
+    const syncFullscreenState = () => {
+      setIsFullscreen(document.fullscreenElement === containerRef.current);
+    };
+
+    document.addEventListener("fullscreenchange", syncFullscreenState);
+
+    return () => {
+      document.removeEventListener("fullscreenchange", syncFullscreenState);
+    };
   }, []);
 
   const pageWidth = useMemo(() => Math.round(containerWidth * scale), [containerWidth, scale]);
@@ -72,13 +96,39 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     );
   };
 
+  const toggleFullscreen = async () => {
+    const node = containerRef.current;
+
+    if (!node) {
+      return;
+    }
+
+    setFullscreenError(null);
+
+    try {
+      if (document.fullscreenElement === node) {
+        await document.exitFullscreen();
+        return;
+      }
+
+      if (!node.requestFullscreen) {
+        setFullscreenError("Fullscreen is not available in this browser.");
+        return;
+      }
+
+      await node.requestFullscreen();
+    } catch {
+      setFullscreenError("Unable to enter fullscreen mode.");
+    }
+  };
+
   return (
     <section
       ref={containerRef}
       aria-label={`PDF viewer for ${title}`}
-      className="min-w-0 rounded-lg border border-line bg-white p-3 shadow-sm sm:p-4"
+      className="pdf-viewer-shell min-w-0 rounded-lg border border-line bg-white p-3 shadow-sm sm:p-4"
     >
-      <div className="flex flex-col gap-3 border-b border-line pb-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="pdf-viewer-toolbar flex flex-col gap-3 border-b border-line pb-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-base font-semibold text-ink">Reader</h2>
           <p className="text-sm text-slate-500">
@@ -134,8 +184,27 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
           >
             <ZoomIn aria-hidden="true" className="h-4 w-4" />
           </button>
+          <span className="mx-1 hidden h-10 w-px bg-line sm:block" />
+          <button
+            type="button"
+            onClick={toggleFullscreen}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-md border border-line text-ink transition hover:border-moss hover:text-moss"
+            aria-label={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+            title={isFullscreen ? "Exit fullscreen" : "Enter fullscreen"}
+          >
+            {isFullscreen ? (
+              <Minimize2 aria-hidden="true" className="h-4 w-4" />
+            ) : (
+              <Maximize2 aria-hidden="true" className="h-4 w-4" />
+            )}
+          </button>
         </div>
       </div>
+      {fullscreenError ? (
+        <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
+          {fullscreenError}
+        </p>
+      ) : null}
 
       {loadError ? (
         <ViewerStatus>{loadError}</ViewerStatus>

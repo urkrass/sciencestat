@@ -57,3 +57,29 @@ a,
 .pdf-page .react-pdf__message {
   padding: 2rem;
 }
+
+.pdf-viewer-shell:fullscreen {
+  width: 100vw;
+  height: 100vh;
+  overflow: auto;
+  border: 0;
+  border-radius: 0;
+  background: #172033;
+  padding: 1rem;
+}
+
+.pdf-viewer-shell:fullscreen .pdf-viewer-toolbar {
+  position: sticky;
+  top: 0;
+  z-index: 20;
+  border: 1px solid #d9dee7;
+  border-radius: 8px;
+  background: #ffffff;
+  padding: 0.75rem;
+  box-shadow: 0 18px 50px rgba(0, 0, 0, 0.18);
+}
+
+.pdf-viewer-shell:fullscreen .pdf-page {
+  min-height: calc(100vh - 7rem);
+  background: #0f172a;
+}
