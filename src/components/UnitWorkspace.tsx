@@ -20,12 +20,20 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("reader");
 
   if (!exerciseSet) {
-    return <PdfViewerShell file={pdfPath} title={title} />;
+    return (
+      <section aria-label={`${title} workspace`} className="h-full min-h-0">
+        <PdfViewerShell file={pdfPath} title={title} />
+      </section>
+    );
   }
 
   return (
-    <section aria-label={`${title} workspace`} className="space-y-4">
-      <div aria-label="Unit workspace" className="flex gap-6 border-b border-line" role="tablist">
+    <section aria-label={`${title} workspace`} className="flex h-full min-h-0 flex-col">
+      <div
+        aria-label="Unit workspace"
+        className="flex shrink-0 gap-6 border-b border-line"
+        role="tablist"
+      >
         <button
           type="button"
           role="tab"
@@ -65,6 +73,7 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
         role="tabpanel"
         aria-labelledby="unit-reader-tab"
         hidden={activeTab !== "reader"}
+        className="min-h-0 flex-1 pt-4"
       >
         {activeTab === "reader" ? <PdfViewerShell file={pdfPath} title={title} /> : null}
       </div>
@@ -74,6 +83,7 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
         role="tabpanel"
         aria-labelledby="unit-practice-tab"
         hidden={activeTab !== "practice"}
+        className="min-h-0 flex-1 pt-4"
       >
         {activeTab === "practice" ? <ExerciseBlock exerciseSet={exerciseSet} /> : null}
       </div>

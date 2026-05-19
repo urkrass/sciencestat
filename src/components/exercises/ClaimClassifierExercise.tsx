@@ -110,85 +110,12 @@ export function ClaimClassifierExercise({
         Drag a label to a statement, or activate a label and then activate a statement.
       </p>
 
-      <div className="mt-8 grid gap-7 md:grid-cols-[minmax(0,1fr)_14rem]">
-        <div className="order-2 space-y-3 md:order-1">
-          {exercise.claims.map((claim, index) => {
-            const selectedLabel = claimAnswers[String(index)] ?? "";
-            const isCorrect = selectedLabel === claim.correctLabel;
-
-            return (
-              <div key={claim.text} className="py-4 first:pt-0">
-                <button
-                  type="button"
-                  aria-describedby={`${exercise.id}-interaction-help`}
-                  aria-label={
-                    selectedLabel
-                      ? `${claim.text} Classification: ${selectedLabel}`
-                      : `${claim.text} No classification selected`
-                  }
-                  onClick={() => {
-                    if (pickedLabel) {
-                      assignLabelToClaim(index, pickedLabel);
-                    }
-                  }}
-                  onDragOver={(event) => event.preventDefault()}
-                  onDrop={(event) => handleClaimDrop(event, index)}
-                  className={[
-                    "group block w-full rounded-md border px-4 py-4 text-left outline-none transition",
-                    selectedLabel
-                      ? "border-moss/50 bg-moss/5"
-                      : "border-moss/40 bg-white/70 hover:bg-moss/5"
-                  ].join(" ")}
-                >
-                  <span className="flex gap-3">
-                    <span
-                      aria-hidden="true"
-                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-moss/50 bg-white text-sm font-semibold text-moss"
-                    >
-                      {index + 1}
-                    </span>
-                    <span className="block text-base leading-7 text-ink">{claim.text}</span>
-                  </span>
-                  <span className="mt-3 flex flex-wrap items-center gap-2 pl-10">
-                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                      Match
-                    </span>
-                    <span
-                      className={[
-                        "inline-flex min-h-9 items-center rounded-md border px-3 py-1 text-sm font-semibold transition",
-                        selectedLabel
-                          ? "border-moss bg-white text-moss"
-                          : "border-dashed border-moss/40 bg-paper/70 text-slate-500 group-hover:border-moss"
-                      ].join(" ")}
-                    >
-                      {selectedLabel || "Drop label"}
-                    </span>
-                  </span>
-                </button>
-
-                {state.checked ? (
-                  <div
-                    className={[
-                      "mt-3 border-l-4 py-1 pl-4 text-sm leading-6",
-                      isCorrect ? "border-moss text-ink" : "border-amber-400 text-amber-950"
-                    ].join(" ")}
-                  >
-                    <p className="font-semibold">
-                      {isCorrect ? "Correct" : `Not quite. Best label: ${claim.correctLabel}`}
-                    </p>
-                    <p className="mt-1">{claim.explanation}</p>
-                  </div>
-                ) : null}
-              </div>
-            );
-          })}
-        </div>
-
-        <div className="order-1 md:order-2 md:border-l md:border-line md:pl-5">
+      <div className="mt-6">
+        <div>
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
             Labels
           </p>
-          <div className="mt-3 flex flex-wrap gap-2 md:flex-col">
+          <div className="mt-3 flex flex-wrap gap-2">
             {exercise.labels.map((label, index) => {
               const isPicked = pickedLabel === label;
 
@@ -222,28 +149,102 @@ export function ClaimClassifierExercise({
               );
             })}
           </div>
+          <div className="mt-3 flex flex-wrap items-center gap-3">
+            <button
+              type="button"
+              disabled={!allClaimsAnswered}
+              onClick={checkAnswer}
+              className={`${actionButtonClass} border-moss bg-moss text-white hover:bg-moss-dark disabled:cursor-not-allowed disabled:border-line disabled:bg-slate-100 disabled:text-slate-400`}
+            >
+              OK
+            </button>
+            <span className="text-sm text-slate-500">
+              drag a label or click a label, then a statement
+            </span>
+            {state.checked ? (
+              <button
+                type="button"
+                onClick={onTryAgain}
+                className={`${actionButtonClass} border-line bg-white text-ink hover:border-moss hover:text-moss`}
+              >
+                Try again
+              </button>
+            ) : null}
+          </div>
         </div>
-      </div>
 
-      <div className="mt-6 flex flex-wrap items-center gap-3">
-        <button
-          type="button"
-          disabled={!allClaimsAnswered}
-          onClick={checkAnswer}
-          className={`${actionButtonClass} border-moss bg-moss text-white hover:bg-moss-dark disabled:cursor-not-allowed disabled:border-line disabled:bg-slate-100 disabled:text-slate-400`}
-        >
-          OK
-        </button>
-        <span className="text-sm text-slate-500">drag a label or click a label, then a statement</span>
-        {state.checked ? (
-          <button
-            type="button"
-            onClick={onTryAgain}
-            className={`${actionButtonClass} border-line bg-white text-ink hover:border-moss hover:text-moss`}
-          >
-            Try again
-          </button>
-        ) : null}
+        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+          {exercise.claims.map((claim, index) => {
+            const selectedLabel = claimAnswers[String(index)] ?? "";
+            const isCorrect = selectedLabel === claim.correctLabel;
+
+            return (
+              <div key={claim.text}>
+                <button
+                  type="button"
+                  aria-describedby={`${exercise.id}-interaction-help`}
+                  aria-label={
+                    selectedLabel
+                      ? `${claim.text} Classification: ${selectedLabel}`
+                      : `${claim.text} No classification selected`
+                  }
+                  onClick={() => {
+                    if (pickedLabel) {
+                      assignLabelToClaim(index, pickedLabel);
+                    }
+                  }}
+                  onDragOver={(event) => event.preventDefault()}
+                  onDrop={(event) => handleClaimDrop(event, index)}
+                  className={[
+                    "group block h-full w-full rounded-md border px-4 py-3 text-left outline-none transition",
+                    selectedLabel
+                      ? "border-moss/50 bg-moss/5"
+                      : "border-moss/40 bg-white/70 hover:bg-moss/5"
+                  ].join(" ")}
+                >
+                  <span className="flex gap-3">
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-moss/50 bg-white text-sm font-semibold text-moss"
+                    >
+                      {index + 1}
+                    </span>
+                    <span className="block text-sm leading-6 text-ink">{claim.text}</span>
+                  </span>
+                  <span className="mt-3 flex flex-wrap items-center gap-2 pl-10">
+                    <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
+                      Match
+                    </span>
+                    <span
+                      className={[
+                        "inline-flex min-h-9 items-center rounded-md border px-3 py-1 text-sm font-semibold transition",
+                        selectedLabel
+                          ? "border-moss bg-white text-moss"
+                          : "border-dashed border-moss/40 bg-paper/70 text-slate-500 group-hover:border-moss"
+                      ].join(" ")}
+                    >
+                      {selectedLabel || "Drop label"}
+                    </span>
+                  </span>
+                </button>
+
+                {state.checked ? (
+                  <div
+                    className={[
+                      "mt-2 border-l-4 py-1 pl-3 text-xs leading-5",
+                      isCorrect ? "border-moss text-ink" : "border-amber-400 text-amber-950"
+                    ].join(" ")}
+                  >
+                    <p className="font-semibold">
+                      {isCorrect ? "Correct" : `Not quite. Best label: ${claim.correctLabel}`}
+                    </p>
+                    <p className="mt-1">{claim.explanation}</p>
+                  </div>
+                ) : null}
+              </div>
+            );
+          })}
+        </div>
       </div>
     </article>
   );

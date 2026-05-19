@@ -213,7 +213,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
   return (
     <section
       aria-labelledby={`${exerciseSet.unitSlug}-exercises-heading`}
-      className="relative flex min-h-[42rem] flex-col overflow-hidden rounded-lg border border-line bg-paper"
+      className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-line bg-paper"
     >
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-moss/20">
         <div
@@ -247,9 +247,9 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-10 sm:px-7 sm:py-14">
+        <div className="min-h-0 flex-1 overflow-hidden px-5 py-6 sm:px-7 sm:py-8">
           <div className="mx-auto w-full max-w-3xl">
-            <p className="mb-6 text-base font-semibold text-moss" aria-live="polite">
+            <p className="mb-4 text-base font-semibold text-moss" aria-live="polite">
               {isComplete ? "Complete" : `${questionNumber} ->`}
               {!isComplete ? (
                 <span className="ml-2 text-sm font-medium text-slate-500">
@@ -260,7 +260,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
           {activeExercise ? (
             renderExercise(activeExercise)
           ) : (
-            <div className="flex min-h-[22rem] flex-col items-start justify-center">
+            <div className="flex h-full min-h-0 flex-col items-start justify-center">
               <h3 className="text-3xl font-semibold text-ink">Practice complete</h3>
               <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
                 You checked {checkedCount} of {exerciseCount} questions and marked{" "}

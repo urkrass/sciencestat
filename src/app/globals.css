@@ -13,12 +13,15 @@
 }
 
 html {
+  height: 100%;
+  overflow: hidden;
   scroll-behavior: smooth;
 }
 
 body {
-  min-height: 100vh;
+  height: 100dvh;
   margin: 0;
+  overflow: hidden;
   background:
     linear-gradient(180deg, rgba(47, 111, 95, 0.06), transparent 360px),
     #fbfbf8;

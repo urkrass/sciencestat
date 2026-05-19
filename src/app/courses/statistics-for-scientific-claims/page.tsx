@@ -11,28 +11,30 @@ export const metadata: Metadata = {
 
 export default function CoursePage() {
   return (
-    <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
-      <section className="border-b border-line pb-8 pt-4">
-        <p className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
-          Digital book
-        </p>
-        <div className="mt-3 max-w-4xl">
-          <h1 className="heading-serif text-4xl font-semibold leading-tight text-ink sm:text-5xl">
-            Statistics for Scientific Claims
-          </h1>
-          <p className="mt-4 text-xl leading-8 text-slate-700">
-            Lecture notes for IB DP Biology and Chemistry
-          </p>
-          <p className="mt-4 max-w-3xl leading-7 text-slate-600">
-            Eleven printable units on scientific data analysis, statistical evidence,
-            uncertainty, and writing defensible conclusions from experimental data.
+    <main className="mx-auto flex h-dvh w-full max-w-7xl flex-col overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+      <section className="shrink-0 border-b border-line pb-3">
+        <div className="flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
+          <div>
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
+              Digital book
+            </p>
+            <h1 className="heading-serif mt-1 text-2xl font-semibold leading-tight text-ink sm:text-3xl">
+              Statistics for Scientific Claims
+            </h1>
+          </div>
+          <p className="max-w-xl text-sm leading-6 text-slate-600 lg:text-right">
+            Lecture notes for IB DP Biology and Chemistry: eleven printable units on
+            statistical evidence, uncertainty, and defensible conclusions.
           </p>
         </div>
       </section>
 
-      <div className="grid gap-6 py-8 lg:grid-cols-[18rem_1fr]">
+      <div className="grid min-h-0 flex-1 gap-4 py-4 lg:grid-cols-[18rem_1fr]">
         <CourseSidebar />
-        <section aria-label="Course units" className="grid gap-4 md:grid-cols-2">
+        <section
+          aria-label="Course units"
+          className="grid min-h-0 gap-3 md:grid-cols-2 xl:grid-cols-3"
+        >
           {statisticsUnits.map((unit) => (
             <UnitCard key={unit.slug} unit={unit} />
           ))}

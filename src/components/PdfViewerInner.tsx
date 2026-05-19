@@ -47,7 +47,7 @@ type ViewerStatusProps = {
 
 function ViewerStatus({ children }: ViewerStatusProps) {
   return (
-    <div className="flex min-h-[22rem] items-center justify-center rounded-lg border border-dashed border-line bg-white p-8 text-center text-sm text-slate-600">
+    <div className="flex h-full min-h-0 items-center justify-center rounded-lg border border-dashed border-line bg-white p-8 text-center text-sm text-slate-600">
       {children}
     </div>
   );
@@ -156,8 +156,9 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     const availablePageWidth = hasSpreadRoom
       ? (readerWidth - horizontalPadding * 2 - 16) / 2
       : readerWidth - horizontalPadding;
-    const availablePageHeight =
-      isFullscreen && readerSize.height ? (readerSize.height - 40) / pageAspectRatio : Infinity;
+    const availablePageHeight = readerSize.height
+      ? (readerSize.height - (isFullscreen ? 40 : 28)) / pageAspectRatio
+      : Infinity;
     const maxPageWidth = isFullscreen ? 680 : 560;
     const minPageWidth = isFullscreen ? 160 : 240;
 
@@ -350,9 +351,9 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     <section
       ref={containerRef}
       aria-label={`PDF viewer for ${title}`}
-      className="pdf-viewer-shell min-w-0 rounded-lg border border-line bg-white p-3 shadow-sm sm:p-4"
+      className="pdf-viewer-shell flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-white p-3 shadow-sm sm:p-4"
     >
-      <div className="pdf-viewer-toolbar flex flex-col gap-3 border-b border-line pb-3 lg:flex-row lg:items-center lg:justify-between">
+      <div className="pdf-viewer-toolbar flex shrink-0 flex-col gap-3 border-b border-line pb-3 lg:flex-row lg:items-center lg:justify-between">
         <div>
           <h2 className="text-base font-semibold text-ink">Reader</h2>
           <p className="text-sm text-slate-500">
@@ -432,7 +433,7 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
           onPointerLeave={hideMagnifier}
           onPointerMove={handleReaderPointerMove}
           className={[
-            "pdf-page pdf-page-book mt-4 max-w-full rounded-md bg-slate-100 px-3 py-6 text-center",
+            "pdf-page pdf-page-book mt-4 flex min-h-0 flex-1 items-center justify-center rounded-md bg-slate-100 px-3 py-4 text-center",
             isMagnifierEnabled ? "pdf-page-book-magnifying" : ""
           ].join(" ")}
           tabIndex={0}
