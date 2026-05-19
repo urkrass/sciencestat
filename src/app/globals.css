@@ -290,6 +290,64 @@ a,
     -webkit-box-orient: vertical;
     -webkit-line-clamp: 2;
   }
+
+  .simulation-histogram-bar {
+    animation: simulation-bar-rise 520ms cubic-bezier(0.2, 0.85, 0.25, 1) both;
+    transform-box: fill-box;
+    transform-origin: center bottom;
+  }
+
+  .simulation-reference-line {
+    animation: simulation-reference-draw 680ms ease-out both;
+  }
+
+  .simulation-result-value {
+    animation: simulation-result-settle 420ms ease-out both;
+  }
+}
+
+@keyframes simulation-bar-rise {
+  from {
+    opacity: 0;
+    transform: scaleY(0.08);
+  }
+
+  to {
+    opacity: 0.82;
+    transform: scaleY(1);
+  }
+}
+
+@keyframes simulation-reference-draw {
+  from {
+    opacity: 0;
+    stroke-dashoffset: 18;
+  }
+
+  to {
+    opacity: 1;
+    stroke-dashoffset: 0;
+  }
+}
+
+@keyframes simulation-result-settle {
+  from {
+    opacity: 0;
+    transform: translateY(0.2rem);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .simulation-histogram-bar,
+  .simulation-reference-line,
+  .simulation-result-value {
+    animation: none;
+  }
 }
 
 @media (min-width: 900px) {

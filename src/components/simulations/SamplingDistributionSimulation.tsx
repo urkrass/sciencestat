@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Histogram } from "@/components/simulations/Histogram";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
@@ -75,6 +75,17 @@ function getInterpretation(sampleSize: number) {
 export function SamplingDistributionSimulation() {
   const [controls, setControls] = useState<SimulationControls>(defaultControls);
   const [result, setResult] = useState(() => createSimulationResult(defaultControls));
+  const [animationKey, setAnimationKey] = useState(0);
+  const [isRunning, setIsRunning] = useState(false);
+  const runTimeoutRef = useRef<number | null>(null);
+
+  useEffect(() => {
+    return () => {
+      if (runTimeoutRef.current !== null) {
+        window.clearTimeout(runTimeoutRef.current);
+      }
+    };
+  }, []);
 
   const updateControls = <Key extends keyof SimulationControls>(
     key: Key,
@@ -86,13 +97,36 @@ export function SamplingDistributionSimulation() {
     }));
   };
 
+  const finishSimulationRun = (nextResult: SimulationResult) => {
+    setResult(nextResult);
+    setAnimationKey((current) => current + 1);
+    setIsRunning(false);
+    runTimeoutRef.current = null;
+  };
+
   const runSimulation = () => {
-    setResult(createSimulationResult(controls));
+    const nextResult = createSimulationResult(controls);
+
+    if (runTimeoutRef.current !== null) {
+      window.clearTimeout(runTimeoutRef.current);
+    }
+
+    setIsRunning(true);
+    runTimeoutRef.current = window.setTimeout(() => {
+      finishSimulationRun(nextResult);
+    }, 180);
   };
 
   const resetSimulation = () => {
+    if (runTimeoutRef.current !== null) {
+      window.clearTimeout(runTimeoutRef.current);
+      runTimeoutRef.current = null;
+    }
+
     setControls(defaultControls);
     setResult(createSimulationResult(defaultControls));
+    setAnimationKey((current) => current + 1);
+    setIsRunning(false);
   };
 
   const generateNewSeed = () => {
@@ -119,7 +153,10 @@ export function SamplingDistributionSimulation() {
   ];
 
   return (
-    <div className="grid h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[18rem_minmax(0,1fr)_19rem] lg:overflow-hidden">
+    <div
+      aria-busy={isRunning}
+      className="grid h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[18rem_minmax(0,1fr)_19rem] lg:overflow-hidden"
+    >
       <section className="min-h-0 border-b border-line bg-paper/70 p-4 lg:border-b-0 lg:border-r lg:overflow-hidden">
         <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
           Controls
@@ -212,10 +249,11 @@ export function SamplingDistributionSimulation() {
             <button
               type="button"
               aria-label="Run simulation"
+              disabled={isRunning}
               onClick={runSimulation}
-              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark"
+              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
             >
-              Run
+              {isRunning ? "Running" : "Run"}
             </button>
             <button
               type="button"
@@ -243,12 +281,21 @@ export function SamplingDistributionSimulation() {
           </span>
         </div>
         <div className="mt-3 flex min-h-0 flex-1 items-center rounded-md bg-[#f9faf6] p-2">
-          <Histogram
-            values={result.sampleMeans}
-            referenceValue={POPULATION_MEAN}
-            xLabel="sample mean"
-            yLabel="number of samples"
-          />
+          <div
+            key={animationKey}
+            className={[
+              "w-full transition-opacity duration-200",
+              isRunning ? "opacity-55" : "opacity-100"
+            ].join(" ")}
+          >
+            <Histogram
+              animationKey={animationKey}
+              values={result.sampleMeans}
+              referenceValue={POPULATION_MEAN}
+              xLabel="sample mean"
+              yLabel="number of samples"
+            />
+          </div>
         </div>
       </section>
 
@@ -259,13 +306,15 @@ export function SamplingDistributionSimulation() {
         <dl className="mt-4 divide-y divide-line border-y border-line">
           {summaryItems.map((item) => (
             <div
-              key={item.label}
+              key={`${animationKey}-${item.label}`}
               className="flex items-center justify-between gap-3 py-3"
             >
               <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-slate-500">
                 {item.label}
               </dt>
-              <dd className="text-xl font-semibold text-ink">{item.value}</dd>
+              <dd className="simulation-result-value text-xl font-semibold text-ink">
+                {item.value}
+              </dd>
             </div>
           ))}
         </dl>

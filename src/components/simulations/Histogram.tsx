@@ -5,6 +5,7 @@ type HistogramProps = {
   referenceValue: number;
   xLabel: string;
   yLabel: string;
+  animationKey?: number;
 };
 
 type HistogramBin = {
@@ -31,7 +32,13 @@ function buildBins(values: number[], min: number, max: number): HistogramBin[] {
   return bins;
 }
 
-export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramProps) {
+export function Histogram({
+  values,
+  referenceValue,
+  xLabel,
+  yLabel,
+  animationKey = 0
+}: HistogramProps) {
   if (values.length === 0) {
     return (
       <div className="flex h-72 items-center justify-center rounded-lg border border-line bg-paper text-sm text-slate-500">
@@ -91,7 +98,7 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
         stroke="#8b98aa"
         strokeWidth="1"
       />
-      {bins.map((bin) => {
+      {bins.map((bin, index) => {
         const barX = xScale(bin.start);
         const nextX = xScale(bin.end);
         const barY = yScale(bin.count);
@@ -99,17 +106,20 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
 
         return (
           <rect
-            key={`${bin.start}-${bin.end}`}
+            key={`${animationKey}-${bin.start}-${bin.end}`}
+            className="simulation-histogram-bar"
             x={barX + 1}
             y={barY}
             width={Math.max(1, nextX - barX - 2)}
             height={barHeight}
             fill="#367765"
             opacity="0.82"
+            style={{ animationDelay: `${index * 18}ms` }}
           />
         );
       })}
       <line
+        className="simulation-reference-line"
         x1={referenceX}
         x2={referenceX}
         y1={margin.top - 2}
