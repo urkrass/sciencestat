@@ -14,7 +14,7 @@ type UnitWorkspaceProps = {
 };
 
 const tabButtonClass =
-  "inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium transition";
+  "inline-flex h-11 items-center justify-center border-b-2 px-1 text-sm font-semibold transition";
 
 export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("reader");
@@ -25,11 +25,7 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
 
   return (
     <section aria-label={`${title} workspace`} className="space-y-4">
-      <div
-        aria-label="Unit workspace"
-        className="inline-flex rounded-lg border border-line bg-white p-1 shadow-sm"
-        role="tablist"
-      >
+      <div aria-label="Unit workspace" className="flex gap-6 border-b border-line" role="tablist">
         <button
           type="button"
           role="tab"
@@ -40,8 +36,8 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
           className={[
             tabButtonClass,
             activeTab === "reader"
-              ? "border-moss bg-moss text-white"
-              : "border-transparent bg-white text-ink hover:bg-slate-100 hover:text-moss"
+              ? "border-moss text-moss"
+              : "border-transparent text-slate-500 hover:text-ink"
           ].join(" ")}
         >
           Reader
@@ -56,8 +52,8 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
           className={[
             tabButtonClass,
             activeTab === "practice"
-              ? "border-moss bg-moss text-white"
-              : "border-transparent bg-white text-ink hover:bg-slate-100 hover:text-moss"
+              ? "border-moss text-moss"
+              : "border-transparent text-slate-500 hover:text-ink"
           ].join(" ")}
         >
           Practice

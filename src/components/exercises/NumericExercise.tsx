@@ -31,7 +31,7 @@ export function NumericExercise({
   const hasValidAnswer = numericValue.trim() !== "" && Number.isFinite(parsedAnswer);
 
   return (
-    <article className="rounded-md border border-line bg-white p-5">
+    <article>
       <div>
         <h3 className="text-lg font-semibold text-ink">{exercise.title}</h3>
         <p className="mt-2 leading-7 text-slate-600">{exercise.prompt}</p>
@@ -85,10 +85,10 @@ export function NumericExercise({
         <div
           aria-live="polite"
           className={[
-            "mt-4 rounded-md border px-4 py-3 text-sm leading-6",
+            "mt-5 border-l-4 py-1 pl-4 text-sm leading-6",
             state.correct
-              ? "border-moss/30 bg-moss/10 text-ink"
-              : "border-amber-200 bg-amber-50 text-amber-950"
+              ? "border-moss text-ink"
+              : "border-amber-400 text-amber-950"
           ].join(" ")}
         >
           <p className="font-semibold">{state.correct ? "Correct" : "Not quite"}</p>
