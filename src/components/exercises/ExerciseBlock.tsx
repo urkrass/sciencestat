@@ -213,9 +213,9 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
   return (
     <section
       aria-labelledby={`${exerciseSet.unitSlug}-exercises-heading`}
-      className="flex min-h-[32rem] flex-col rounded-lg border border-line bg-paper/80 p-5 shadow-sm sm:p-7"
+      className="flex min-h-[32rem] flex-col py-5"
     >
-      <div className="flex flex-col gap-4 border-b border-line pb-5 md:flex-row md:items-start md:justify-between">
+      <div className="flex flex-col gap-4 pb-5 md:flex-row md:items-start md:justify-between">
         <div>
           <p className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
             Practice
@@ -253,7 +253,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
         </div>
         <div
           aria-hidden="true"
-          className="mt-3 h-2 overflow-hidden rounded-full bg-slate-200"
+          className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200"
         >
           <div
             className="h-full rounded-full bg-moss transition-[width] duration-200"
@@ -267,7 +267,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
           {activeExercise ? (
             renderExercise(activeExercise)
           ) : (
-            <div className="flex min-h-[22rem] flex-col items-start justify-center rounded-lg border border-line bg-white p-6 shadow-sm">
+            <div className="flex min-h-[22rem] flex-col items-start justify-center">
               <p className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
                 Complete
               </p>
@@ -298,7 +298,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
         </div>
 
         {!isComplete && activeExercise ? (
-          <div className="mt-5 flex flex-col gap-3 border-t border-line pt-4 sm:flex-row sm:items-center sm:justify-between">
+          <div className="mt-6 flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
               onClick={goToPrevious}

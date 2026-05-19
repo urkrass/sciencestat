@@ -29,28 +29,32 @@ export function MultipleChoiceExercise({
   const hasSelection = typeof state.selectedIndex === "number";
 
   return (
-    <article className="rounded-md border border-line bg-white p-5">
+    <article>
       <div>
         <h3 className="text-lg font-semibold text-ink">{exercise.title}</h3>
         <p className="mt-2 leading-7 text-slate-600">{exercise.prompt}</p>
       </div>
 
-      <fieldset className="mt-4 space-y-3">
+      <fieldset className="mt-5 divide-y divide-line">
         <legend className="sr-only">{exercise.title}</legend>
         {exercise.options.map((option, index) => {
           const inputId = `${exercise.id}-${index}`;
+          const isSelected = state.selectedIndex === index;
 
           return (
             <label
               key={option}
               htmlFor={inputId}
-              className="flex cursor-pointer gap-3 rounded-md border border-line bg-paper/60 p-3 text-sm leading-6 text-slate-700 transition hover:border-moss"
+              className={[
+                "flex cursor-pointer gap-3 px-1 py-4 text-sm leading-6 transition",
+                isSelected ? "bg-moss/5 text-ink" : "text-slate-700 hover:bg-paper"
+              ].join(" ")}
             >
               <input
                 id={inputId}
                 name={exercise.id}
                 type="radio"
-                checked={state.selectedIndex === index}
+                checked={isSelected}
                 onChange={() =>
                   onChange({
                     checked: false,
@@ -94,10 +98,10 @@ export function MultipleChoiceExercise({
         <div
           aria-live="polite"
           className={[
-            "mt-4 rounded-md border px-4 py-3 text-sm leading-6",
+            "mt-5 border-l-4 py-1 pl-4 text-sm leading-6",
             state.correct
-              ? "border-moss/30 bg-moss/10 text-ink"
-              : "border-amber-200 bg-amber-50 text-amber-950"
+              ? "border-moss text-ink"
+              : "border-amber-400 text-amber-950"
           ].join(" ")}
         >
           <p className="font-semibold">{state.correct ? "Correct" : "Not quite"}</p>
