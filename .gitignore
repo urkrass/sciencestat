@@ -1,0 +1,14 @@
+node_modules
+.codex-npm
+.codex-npm.tgz
+/unit*_statistics_for_scientific_claims.pdf
+.next
+out
+.vercel
+dist
+build
+*.log
+*.tsbuildinfo
+.env
+.env.*
+!.env.example
