@@ -1,7 +1,9 @@
 import type { ExerciseSet } from "./types";
+import { unit01ExerciseSet } from "./unit01";
 import { unit05ExerciseSet } from "./unit05";
 
 const exerciseSetsByUnitSlug = new Map<string, ExerciseSet>([
+  [unit01ExerciseSet.unitSlug, unit01ExerciseSet],
   [unit05ExerciseSet.unitSlug, unit05ExerciseSet]
 ]);
 
