@@ -18,10 +18,14 @@ type ClaimClassifierExerciseProps = {
 };
 
 const actionButtonClass =
-  "inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium transition";
+  "inline-flex h-12 items-center justify-center rounded-md border px-5 text-base font-semibold transition";
 
 const labelChipClass =
-  "inline-flex min-h-10 items-center rounded-full border px-4 py-2 text-sm font-medium transition";
+  "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 py-2 text-base font-semibold transition";
+
+function getOptionKey(index: number) {
+  return String.fromCharCode(65 + index);
+}
 
 export function ClaimClassifierExercise({
   exercise,
@@ -72,19 +76,42 @@ export function ClaimClassifierExercise({
     setPickedLabel((currentLabel) => (currentLabel === label ? null : label));
   };
 
+  const checkAnswer = () => {
+    onCheck(
+      exercise.claims.every(
+        (claim, index) => claimAnswers[String(index)] === claim.correctLabel
+      )
+    );
+  };
+
   return (
-    <article>
+    <article
+      onKeyDown={(event) => {
+        if (
+          event.key === "Enter" &&
+          allClaimsAnswered &&
+          !(event.target instanceof HTMLButtonElement)
+        ) {
+          event.preventDefault();
+          checkAnswer();
+        }
+      }}
+    >
       <div>
-        <h3 className="text-lg font-semibold text-ink">{exercise.title}</h3>
-        <p className="mt-2 leading-7 text-slate-600">{exercise.prompt}</p>
+        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+          {exercise.title}
+        </h3>
+        <p className="mt-3 text-2xl leading-snug text-ink sm:text-3xl">
+          {exercise.prompt}
+        </p>
       </div>
 
       <p id={`${exercise.id}-interaction-help`} className="sr-only">
         Drag a label to a statement, or activate a label and then activate a statement.
       </p>
 
-      <div className="mt-6 grid gap-6 md:grid-cols-[minmax(0,1fr)_13rem]">
-        <div className="order-2 divide-y divide-line md:order-1">
+      <div className="mt-8 grid gap-7 md:grid-cols-[minmax(0,1fr)_14rem]">
+        <div className="order-2 space-y-3 md:order-1">
           {exercise.claims.map((claim, index) => {
             const selectedLabel = claimAnswers[String(index)] ?? "";
             const isCorrect = selectedLabel === claim.correctLabel;
@@ -106,19 +133,32 @@ export function ClaimClassifierExercise({
                   }}
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={(event) => handleClaimDrop(event, index)}
-                  className="group block w-full text-left outline-none"
+                  className={[
+                    "group block w-full rounded-md border px-4 py-4 text-left outline-none transition",
+                    selectedLabel
+                      ? "border-moss/50 bg-moss/5"
+                      : "border-moss/40 bg-white/70 hover:bg-moss/5"
+                  ].join(" ")}
                 >
-                  <span className="block text-sm leading-6 text-slate-700">{claim.text}</span>
-                  <span className="mt-3 flex flex-wrap items-center gap-2">
+                  <span className="flex gap-3">
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-moss/50 bg-white text-sm font-semibold text-moss"
+                    >
+                      {index + 1}
+                    </span>
+                    <span className="block text-base leading-7 text-ink">{claim.text}</span>
+                  </span>
+                  <span className="mt-3 flex flex-wrap items-center gap-2 pl-10">
                     <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
-                      Classification
+                      Match
                     </span>
                     <span
                       className={[
-                        "inline-flex min-h-9 items-center rounded-full border px-3 py-1 text-sm font-medium transition",
+                        "inline-flex min-h-9 items-center rounded-md border px-3 py-1 text-sm font-semibold transition",
                         selectedLabel
-                          ? "border-moss/30 bg-moss/10 text-moss"
-                          : "border-dashed border-line bg-paper text-slate-500 group-hover:border-moss/60"
+                          ? "border-moss bg-white text-moss"
+                          : "border-dashed border-moss/40 bg-paper/70 text-slate-500 group-hover:border-moss"
                       ].join(" ")}
                     >
                       {selectedLabel || "Drop label"}
@@ -149,7 +189,7 @@ export function ClaimClassifierExercise({
             Labels
           </p>
           <div className="mt-3 flex flex-wrap gap-2 md:flex-col">
-            {exercise.labels.map((label) => {
+            {exercise.labels.map((label, index) => {
               const isPicked = pickedLabel === label;
 
               return (
@@ -165,9 +205,18 @@ export function ClaimClassifierExercise({
                     labelChipClass,
                     isPicked
                       ? "border-moss bg-moss text-white"
-                      : "border-line bg-white text-ink hover:border-moss hover:text-moss"
+                      : "border-moss/50 bg-white/70 text-ink hover:bg-moss/5"
                   ].join(" ")}
                 >
+                  <span
+                    aria-hidden="true"
+                    className={[
+                      "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border text-sm",
+                      isPicked ? "border-white/50" : "border-moss/60 bg-white text-moss"
+                    ].join(" ")}
+                  >
+                    {getOptionKey(index)}
+                  </span>
                   {label}
                 </button>
               );
@@ -176,21 +225,16 @@ export function ClaimClassifierExercise({
         </div>
       </div>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={!allClaimsAnswered}
-          onClick={() =>
-            onCheck(
-              exercise.claims.every(
-                (claim, index) => claimAnswers[String(index)] === claim.correctLabel
-              )
-            )
-          }
+          onClick={checkAnswer}
           className={`${actionButtonClass} border-moss bg-moss text-white hover:bg-moss-dark disabled:cursor-not-allowed disabled:border-line disabled:bg-slate-100 disabled:text-slate-400`}
         >
-          Check
+          OK
         </button>
+        <span className="text-sm text-slate-500">drag a label or click a label, then a statement</span>
         {state.checked ? (
           <button
             type="button"

@@ -17,7 +17,11 @@ type MultipleChoiceExerciseProps = {
 };
 
 const actionButtonClass =
-  "inline-flex h-10 items-center justify-center rounded-md border px-4 text-sm font-medium transition";
+  "inline-flex h-12 items-center justify-center rounded-md border px-5 text-base font-semibold transition";
+
+function getOptionKey(index: number) {
+  return String.fromCharCode(65 + index);
+}
 
 export function MultipleChoiceExercise({
   exercise,
@@ -27,27 +31,46 @@ export function MultipleChoiceExercise({
   onTryAgain
 }: MultipleChoiceExerciseProps) {
   const hasSelection = typeof state.selectedIndex === "number";
+  const checkAnswer = () => {
+    if (typeof state.selectedIndex === "number") {
+      onCheck(state.selectedIndex === exercise.correctIndex);
+    }
+  };
 
   return (
-    <article>
+    <article
+      onKeyDown={(event) => {
+        if (event.key === "Enter" && hasSelection && !(event.target instanceof HTMLButtonElement)) {
+          event.preventDefault();
+          checkAnswer();
+        }
+      }}
+    >
       <div>
-        <h3 className="text-lg font-semibold text-ink">{exercise.title}</h3>
-        <p className="mt-2 leading-7 text-slate-600">{exercise.prompt}</p>
+        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+          {exercise.title}
+        </h3>
+        <p className="mt-3 text-2xl leading-snug text-ink sm:text-3xl">
+          {exercise.prompt}
+        </p>
       </div>
 
-      <fieldset className="mt-5 divide-y divide-line">
+      <fieldset className="mt-8 space-y-3">
         <legend className="sr-only">{exercise.title}</legend>
         {exercise.options.map((option, index) => {
           const inputId = `${exercise.id}-${index}`;
           const isSelected = state.selectedIndex === index;
+          const displayOption = option.replace(/^[A-Z]\.\s*/, "");
 
           return (
             <label
               key={option}
               htmlFor={inputId}
               className={[
-                "flex cursor-pointer gap-3 px-1 py-4 text-sm leading-6 transition",
-                isSelected ? "bg-moss/5 text-ink" : "text-slate-700 hover:bg-paper"
+                "group flex cursor-pointer items-start gap-3 rounded-md border px-3 py-3 text-lg leading-snug transition sm:px-4",
+                isSelected
+                  ? "border-moss bg-moss/10 text-ink shadow-sm"
+                  : "border-moss/50 bg-white/70 text-ink hover:bg-moss/5"
               ].join(" ")}
             >
               <input
@@ -60,29 +83,37 @@ export function MultipleChoiceExercise({
                     checked: false,
                     correct: undefined,
                     selectedIndex: index
-                  })
+                })
                 }
-                className="mt-1 h-4 w-4 accent-moss"
+                className="sr-only"
               />
-              <span>{option}</span>
+              <span
+                aria-hidden="true"
+                className={[
+                  "mt-0.5 inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border text-sm font-semibold",
+                  isSelected
+                    ? "border-moss bg-moss text-white"
+                    : "border-moss/60 bg-white text-moss group-hover:border-moss"
+                ].join(" ")}
+              >
+                {getOptionKey(index)}
+              </span>
+              <span>{displayOption}</span>
             </label>
           );
         })}
       </fieldset>
 
-      <div className="mt-4 flex flex-wrap gap-2">
+      <div className="mt-6 flex flex-wrap items-center gap-3">
         <button
           type="button"
           disabled={!hasSelection}
-          onClick={() => {
-            if (typeof state.selectedIndex === "number") {
-              onCheck(state.selectedIndex === exercise.correctIndex);
-            }
-          }}
+          onClick={checkAnswer}
           className={`${actionButtonClass} border-moss bg-moss text-white hover:bg-moss-dark disabled:cursor-not-allowed disabled:border-line disabled:bg-slate-100 disabled:text-slate-400`}
         >
-          Check
+          OK
         </button>
+        <span className="text-sm text-slate-500">press Enter after choosing</span>
         {state.checked ? (
           <button
             type="button"
@@ -98,7 +129,7 @@ export function MultipleChoiceExercise({
         <div
           aria-live="polite"
           className={[
-            "mt-5 border-l-4 py-1 pl-4 text-sm leading-6",
+            "mt-6 border-l-4 py-1 pl-4 text-base leading-7",
             state.correct
               ? "border-moss text-ink"
               : "border-amber-400 text-amber-950"

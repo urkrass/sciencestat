@@ -213,66 +213,56 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
   return (
     <section
       aria-labelledby={`${exerciseSet.unitSlug}-exercises-heading`}
-      className="flex min-h-[32rem] flex-col py-5"
+      className="relative flex min-h-[42rem] flex-col overflow-hidden rounded-lg border border-line bg-paper"
     >
-      <div className="flex flex-col gap-4 pb-5 md:flex-row md:items-start md:justify-between">
-        <div>
-          <p className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
-            Practice
-          </p>
+      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-moss/20">
+        <div
+          className="h-full bg-moss transition-[width] duration-200"
+          style={{ width: `${progressValue}%` }}
+        />
+      </div>
+
+      <div className="flex items-center justify-between gap-3 px-5 pt-5 sm:px-7">
+        <div className="min-w-0">
           <h2
             id={`${exerciseSet.unitSlug}-exercises-heading`}
-            className="mt-2 text-2xl font-semibold text-ink"
+            className="text-sm font-semibold uppercase tracking-[0.14em] text-moss"
           >
             {exerciseSet.title}
           </h2>
-          <p className="mt-3 max-w-3xl leading-7 text-slate-600">{exerciseSet.intro}</p>
+          <p className="sr-only">{exerciseSet.intro}</p>
         </div>
-        <div className="flex shrink-0 flex-wrap items-center gap-3">
-          <p className="text-sm font-medium text-slate-600" aria-live="polite">
-            {checkedCount} of {exerciseSet.exercises.length} checked
+        <div className="flex shrink-0 items-center gap-3">
+          <p className="hidden text-sm font-medium text-slate-500 sm:block" aria-live="polite">
+            {checkedCount}/{exerciseSet.exercises.length} checked
           </p>
           <button
             type="button"
             onClick={resetExercises}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
+            className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-white/70 px-3 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
           >
-            Reset exercises
+            Reset
           </button>
         </div>
       </div>
 
-      <div className="mt-5">
-        <div className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-sm font-semibold text-ink" aria-live="polite">
-            {isComplete ? "Practice complete" : `Question ${questionNumber} of ${exerciseCount}`}
-          </p>
-          <p className="text-sm text-slate-500">
-            {correctCount} correct after checking
-          </p>
-        </div>
-        <div
-          aria-hidden="true"
-          className="mt-3 h-1.5 overflow-hidden rounded-full bg-slate-200"
-        >
-          <div
-            className="h-full rounded-full bg-moss transition-[width] duration-200"
-            style={{ width: `${progressValue}%` }}
-          />
-        </div>
-      </div>
-
-      <div className="mt-5 flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 overflow-y-auto pr-1">
+      <div className="flex min-h-0 flex-1 flex-col">
+        <div className="min-h-0 flex-1 overflow-y-auto px-5 py-10 sm:px-7 sm:py-14">
+          <div className="mx-auto w-full max-w-3xl">
+            <p className="mb-6 text-base font-semibold text-moss" aria-live="polite">
+              {isComplete ? "Complete" : `${questionNumber} ->`}
+              {!isComplete ? (
+                <span className="ml-2 text-sm font-medium text-slate-500">
+                  Question {questionNumber} of {exerciseCount}
+                </span>
+              ) : null}
+            </p>
           {activeExercise ? (
             renderExercise(activeExercise)
           ) : (
             <div className="flex min-h-[22rem] flex-col items-start justify-center">
-              <p className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
-                Complete
-              </p>
-              <h3 className="mt-3 text-2xl font-semibold text-ink">Practice complete</h3>
-              <p className="mt-3 max-w-2xl leading-7 text-slate-600">
+              <h3 className="text-3xl font-semibold text-ink">Practice complete</h3>
+              <p className="mt-4 max-w-2xl text-lg leading-8 text-slate-600">
                 You checked {checkedCount} of {exerciseCount} questions and marked{" "}
                 {correctCount} correct. You can review your responses or reset the
                 practice set.
@@ -295,10 +285,11 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
               </div>
             </div>
           )}
+          </div>
         </div>
 
         {!isComplete && activeExercise ? (
-          <div className="mt-6 flex flex-col gap-3 pt-2 sm:flex-row sm:items-center sm:justify-between">
+          <div className="flex flex-col gap-3 border-t border-line bg-white/45 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
             <button
               type="button"
               onClick={goToPrevious}
@@ -308,7 +299,9 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
               Back
             </button>
             <p className="text-sm text-slate-500">
-              {exerciseState[activeExercise.id]?.checked ? "Checked" : "Not checked yet"}
+              {exerciseState[activeExercise.id]?.checked
+                ? `${exerciseState[activeExercise.id]?.correct ? "Correct" : "Not quite"}`
+                : `${correctCount} correct after checking`}
             </p>
             <button
               type="button"
