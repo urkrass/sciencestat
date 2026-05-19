@@ -31,7 +31,7 @@ export function NumericExercise({
   const hasValidAnswer = numericValue.trim() !== "" && Number.isFinite(parsedAnswer);
 
   return (
-    <article className="rounded-lg border border-line bg-white p-5 shadow-sm">
+    <article className="rounded-md border border-line bg-white p-5">
       <div>
         <h3 className="text-lg font-semibold text-ink">{exercise.title}</h3>
         <p className="mt-2 leading-7 text-slate-600">{exercise.prompt}</p>
