@@ -20,6 +20,7 @@ type ExerciseStateById = Record<string, ExerciseAnswerState>;
 
 type ExerciseBlockProps = {
   exerciseSet: ExerciseSet;
+  workspaceSwitch?: React.ReactNode;
 };
 
 function isExerciseStateById(value: unknown): value is ExerciseStateById {
@@ -34,7 +35,7 @@ function getActiveIndexStorageKey(unitSlug: string) {
   return `sciencestat:exercises:${unitSlug}:activeIndex`;
 }
 
-export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
+export function ExerciseBlock({ exerciseSet, workspaceSwitch }: ExerciseBlockProps) {
   const [exerciseState, setExerciseState] = useState<ExerciseStateById>({});
   const [activeIndex, setActiveIndex] = useState(0);
   const [hasLoadedStorage, setHasLoadedStorage] = useState(false);
@@ -208,29 +209,24 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
   const isComplete = activeIndex >= exerciseCount;
   const activeExercise = isComplete ? null : exerciseSet.exercises[activeIndex];
   const questionNumber = Math.min(activeIndex + 1, exerciseCount);
-  const progressValue = isComplete ? 100 : (questionNumber / exerciseCount) * 100;
 
   return (
     <section
       aria-labelledby={`${exerciseSet.unitSlug}-exercises-heading`}
-      className="practice-frame relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-line bg-paper"
+      className="practice-frame flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-line bg-paper"
     >
-      <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-moss/20">
-        <div
-          className="h-full bg-moss transition-[width] duration-200"
-          style={{ width: `${progressValue}%` }}
-        />
-      </div>
-
       <div className="practice-frame-header flex items-center justify-between gap-3">
-        <div className="min-w-0">
-          <h2
-            id={`${exerciseSet.unitSlug}-exercises-heading`}
-            className="text-sm font-semibold uppercase tracking-[0.14em] text-moss"
-          >
-            {exerciseSet.title}
-          </h2>
-          <p className="sr-only">{exerciseSet.intro}</p>
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <div className="min-w-0">
+            <h2
+              id={`${exerciseSet.unitSlug}-exercises-heading`}
+              className="text-sm font-semibold uppercase tracking-[0.14em] text-moss"
+            >
+              {exerciseSet.title}
+            </h2>
+            <p className="sr-only">{exerciseSet.intro}</p>
+          </div>
+          {workspaceSwitch}
         </div>
         <div className="flex shrink-0 items-center gap-3">
           <p className="hidden text-sm font-medium text-slate-500 sm:block" aria-live="polite">

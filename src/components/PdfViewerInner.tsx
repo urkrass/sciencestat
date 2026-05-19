@@ -21,6 +21,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export type PdfViewerProps = {
   file: string;
   title: string;
+  workspaceSwitch?: React.ReactNode;
 };
 
 type FlipBookApi = {
@@ -65,7 +66,7 @@ type ReaderSize = {
 const magnifierSize = 190;
 const magnifierScale = 2.25;
 
-export default function PdfViewerInner({ file, title }: PdfViewerProps) {
+export default function PdfViewerInner({ file, title, workspaceSwitch }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<HTMLDivElement>(null);
   const magnifierCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -354,11 +355,14 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
       className="pdf-viewer-shell flex h-full min-h-0 min-w-0 flex-col overflow-hidden rounded-lg border border-line bg-white p-3 shadow-sm sm:p-4"
     >
       <div className="pdf-viewer-toolbar flex shrink-0 flex-col gap-3 border-b border-line pb-3 lg:flex-row lg:items-center lg:justify-between">
-        <div>
-          <h2 className="text-base font-semibold text-ink">Reader</h2>
-          <p className="text-sm text-slate-500">
-            Page {pageNumber} / {totalPagesLabel}
-          </p>
+        <div className="flex min-w-0 flex-wrap items-center gap-3">
+          <div>
+            <h2 className="text-base font-semibold text-ink">Reader</h2>
+            <p className="text-sm text-slate-500">
+              Page {pageNumber} / {totalPagesLabel}
+            </p>
+          </div>
+          {workspaceSwitch}
         </div>
         <div className="flex flex-wrap gap-2">
           <button
