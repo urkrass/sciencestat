@@ -43,6 +43,11 @@ a,
   font-family: Georgia, "Times New Roman", serif;
 }
 
+.pdf-viewer-toolbar {
+  position: relative;
+  z-index: 30;
+}
+
 .pdf-page .react-pdf__Page {
   display: inline-block;
 }
@@ -50,72 +55,31 @@ a,
 .pdf-page-book {
   overflow: hidden;
   outline: none;
-  perspective: 2200px;
   touch-action: pan-y;
 }
 
-.pdf-book-stage {
-  max-width: 100%;
+.pdf-flipbook {
   margin: 0 auto;
-  transform-style: preserve-3d;
 }
 
-.pdf-page-label {
-  margin: 0 0 0.65rem;
-  color: #64748b;
-  font-size: 0.78rem;
-  font-weight: 600;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
+.pdf-flipbook .stf__wrapper {
+  margin: 0 auto;
 }
 
-.pdf-book-page-space {
-  position: relative;
-  display: inline-block;
-  max-width: 100%;
-  transform-style: preserve-3d;
-}
-
-.pdf-book-page {
-  position: relative;
-  z-index: 1;
-  border-radius: 4px;
-  background: #ffffff;
-}
-
-.pdf-book-page-stationary {
-  box-shadow: 0 18px 50px rgba(23, 32, 51, 0.1);
-}
-
-.pdf-book-turn-sheet {
-  position: absolute;
-  inset: 0;
-  z-index: 5;
-  transform-style: preserve-3d;
-  transform-origin: left center;
-  pointer-events: none;
-}
-
-.pdf-book-turn-sheet-next {
-  animation: pdf-page-turn-next 760ms cubic-bezier(0.2, 0.62, 0.2, 1) forwards;
-}
-
-.pdf-book-turn-sheet-previous {
-  animation: pdf-page-turn-previous 760ms cubic-bezier(0.2, 0.62, 0.2, 1) forwards;
-}
-
-.pdf-book-turn-face {
-  position: absolute;
-  inset: 0;
+.pdf-flipbook-page {
   overflow: hidden;
   border-radius: 4px;
-  backface-visibility: hidden;
   background: #ffffff;
-  box-shadow: 0 18px 50px rgba(23, 32, 51, 0.18);
+  box-shadow: 0 18px 50px rgba(23, 32, 51, 0.12);
 }
 
-.pdf-book-turn-back {
-  transform: rotateY(180deg);
+.pdf-flipbook-page .react-pdf__Page {
+  display: block;
+}
+
+.pdf-flipbook-page .react-pdf__Page__textContent,
+.pdf-flipbook-page .react-pdf__Page__annotations {
+  pointer-events: none;
 }
 
 .pdf-page .react-pdf__Page canvas {
@@ -153,35 +117,4 @@ a,
 .pdf-viewer-shell:fullscreen .pdf-page {
   min-height: calc(100vh - 7rem);
   background: #0f172a;
-}
-
-.pdf-viewer-shell:fullscreen .pdf-page-label {
-  color: #cbd5e1;
-}
-
-@keyframes pdf-page-turn-next {
-  from {
-    transform: rotateY(0deg);
-  }
-
-  to {
-    transform: rotateY(-180deg);
-  }
-}
-
-@keyframes pdf-page-turn-previous {
-  from {
-    transform: rotateY(-180deg);
-  }
-
-  to {
-    transform: rotateY(0deg);
-  }
-}
-
-@media (prefers-reduced-motion: reduce) {
-  .pdf-book-turn-sheet-next,
-  .pdf-book-turn-sheet-previous {
-    animation-duration: 1ms;
-  }
 }
