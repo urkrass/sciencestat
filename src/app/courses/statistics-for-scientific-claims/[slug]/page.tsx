@@ -3,8 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Download, ExternalLink, FileText } from "lucide-react";
 import { CourseSidebar } from "@/components/CourseSidebar";
-import { ExerciseBlock } from "@/components/exercises/ExerciseBlock";
-import { PdfViewerShell } from "@/components/PdfViewerShell";
+import { UnitWorkspace } from "@/components/UnitWorkspace";
 import { getExerciseSetForUnit } from "@/content/exercises";
 import {
   getAdjacentStatisticsUnits,
@@ -118,9 +117,11 @@ export default async function UnitPage({ params }: UnitPageProps) {
             </div>
           </section>
 
-          <PdfViewerShell file={unit.pdfPath} title={unit.title} />
-
-          {exerciseSet ? <ExerciseBlock exerciseSet={exerciseSet} /> : null}
+          <UnitWorkspace
+            exerciseSet={exerciseSet}
+            pdfPath={unit.pdfPath}
+            title={unit.title}
+          />
 
           <nav
             aria-label="Adjacent units"
