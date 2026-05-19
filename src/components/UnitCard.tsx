@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Download, FileText } from "lucide-react";
+import { getExerciseSetForUnit } from "@/content/exercises";
 import type { StatisticsUnit } from "@/content/statisticsUnits";
 
 type UnitCardProps = {
@@ -11,6 +12,7 @@ const baseButtonClass =
 
 export function UnitCard({ unit }: UnitCardProps) {
   const unitHref = `/courses/statistics-for-scientific-claims/${unit.slug}`;
+  const hasExercises = Boolean(getExerciseSetForUnit(unit.slug));
 
   return (
     <article className="rounded-lg border border-line bg-white p-5 shadow-sm transition hover:-translate-y-0.5 hover:shadow-sheet">
@@ -22,6 +24,11 @@ export function UnitCard({ unit }: UnitCardProps) {
           <h2 className="mt-2 text-xl font-semibold leading-tight text-ink">
             {unit.title}
           </h2>
+          {hasExercises ? (
+            <span className="mt-3 inline-flex rounded-full border border-moss/30 bg-moss/10 px-3 py-1 text-xs font-semibold uppercase tracking-[0.12em] text-moss">
+              Interactive exercises
+            </span>
+          ) : null}
         </div>
       </div>
       <p className="mt-4 min-h-[5rem] text-sm leading-6 text-slate-600">

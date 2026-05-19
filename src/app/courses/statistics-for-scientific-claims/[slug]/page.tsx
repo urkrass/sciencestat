@@ -3,7 +3,9 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { ArrowLeft, ArrowRight, Download, ExternalLink, FileText } from "lucide-react";
 import { CourseSidebar } from "@/components/CourseSidebar";
+import { ExerciseBlock } from "@/components/exercises/ExerciseBlock";
 import { PdfViewerShell } from "@/components/PdfViewerShell";
+import { getExerciseSetForUnit } from "@/content/exercises";
 import {
   getAdjacentStatisticsUnits,
   getStatisticsUnit,
@@ -50,6 +52,7 @@ export default async function UnitPage({ params }: UnitPageProps) {
   }
 
   const { previous, next } = getAdjacentStatisticsUnits(unit);
+  const exerciseSet = getExerciseSetForUnit(unit.slug);
 
   return (
     <main className="mx-auto w-full max-w-7xl px-4 py-8 sm:px-6 lg:px-8">
@@ -116,6 +119,8 @@ export default async function UnitPage({ params }: UnitPageProps) {
           </section>
 
           <PdfViewerShell file={unit.pdfPath} title={unit.title} />
+
+          {exerciseSet ? <ExerciseBlock exerciseSet={exerciseSet} /> : null}
 
           <nav
             aria-label="Adjacent units"
