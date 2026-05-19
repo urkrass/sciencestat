@@ -17,7 +17,7 @@ type TrueFalseExerciseProps = {
 };
 
 const actionButtonClass =
-  "inline-flex h-12 items-center justify-center rounded-md border px-5 text-base font-semibold transition";
+  "practice-action-button inline-flex items-center justify-center rounded-md border font-semibold transition";
 
 export function TrueFalseExercise({
   exercise,
@@ -43,17 +43,15 @@ export function TrueFalseExercise({
       }}
     >
       <div>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+        <h3 className="practice-question-title font-semibold uppercase text-moss">
           {exercise.title}
         </h3>
-        <p className="mt-3 text-2xl leading-snug text-ink sm:text-3xl">
-          {exercise.prompt}
-        </p>
+        <p className="practice-prompt text-ink">{exercise.prompt}</p>
       </div>
 
       {state.checked && hasSelection ? (
-        <div className="mt-6 space-y-4">
-          <div className="rounded-md border border-moss/40 bg-white/80 px-4 py-3">
+        <div className="practice-checked-state grid">
+          <div className="practice-answer-panel rounded-md border border-moss/40 bg-white/80">
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
               Your answer
             </p>
@@ -64,7 +62,7 @@ export function TrueFalseExercise({
           <div
             aria-live="polite"
             className={[
-              "border-l-4 py-1 pl-4 text-sm leading-6",
+              "practice-feedback border-l-4 py-1 pl-4",
               state.correct
                 ? "border-moss text-ink"
                 : "border-amber-400 text-amber-950"
@@ -76,14 +74,14 @@ export function TrueFalseExercise({
           <button
             type="button"
             onClick={onTryAgain}
-            className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
+            className="inline-flex h-9 w-fit items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
           >
             Try again
           </button>
         </div>
       ) : (
         <>
-          <fieldset className="mt-8 space-y-3">
+          <fieldset className="practice-choice-list">
             <legend className="sr-only">{exercise.title}</legend>
             {[true, false].map((answer, index) => {
               const inputId = `${exercise.id}-${answer ? "true" : "false"}`;
@@ -95,7 +93,7 @@ export function TrueFalseExercise({
                   key={String(answer)}
                   htmlFor={inputId}
                   className={[
-                    "group flex cursor-pointer items-center gap-3 rounded-md border px-3 py-3 text-lg font-medium transition sm:px-4",
+                    "practice-choice-option group flex cursor-pointer items-center rounded-md border font-medium transition",
                     isSelected
                       ? "border-moss bg-moss/10 text-ink shadow-sm"
                       : "border-moss/50 bg-white/70 text-ink hover:bg-moss/5"
@@ -116,9 +114,9 @@ export function TrueFalseExercise({
                     className="sr-only"
                   />
                   <span
-                    aria-hidden="true"
-                    className={[
-                      "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border text-sm font-semibold",
+                  aria-hidden="true"
+                  className={[
+                      "practice-option-key inline-flex shrink-0 items-center justify-center rounded border font-semibold",
                       isSelected
                         ? "border-moss bg-moss text-white"
                         : "border-moss/60 bg-white text-moss group-hover:border-moss"
@@ -132,7 +130,7 @@ export function TrueFalseExercise({
             })}
           </fieldset>
 
-          <div className="mt-6 flex flex-wrap items-center gap-3">
+          <div className="practice-action-row flex flex-wrap items-center">
             <button
               type="button"
               disabled={!hasSelection}

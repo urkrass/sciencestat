@@ -147,3 +147,163 @@ a,
   padding: 1rem;
   background: #0f172a;
 }
+
+@layer components {
+  .practice-frame {
+    --practice-body-pad-x: clamp(1.25rem, 2.1vw, 1.75rem);
+    --practice-body-pad-y: clamp(0.75rem, 1.9vh, 1.55rem);
+    --practice-gap: clamp(0.45rem, 1vh, 0.75rem);
+    --practice-prompt-size: clamp(1.45rem, 3.55vh, 2.28rem);
+    --practice-prompt-line: 1.13;
+    --practice-option-size: clamp(0.98rem, 2.05vh, 1.2rem);
+    --practice-option-pad-y: clamp(0.45rem, 1.05vh, 0.72rem);
+    --practice-option-pad-x: clamp(0.85rem, 1.7vw, 1.15rem);
+    --practice-key-size: clamp(1.8rem, 3.4vh, 2.15rem);
+  }
+
+  .practice-frame-header {
+    padding-inline: var(--practice-body-pad-x);
+    padding-top: clamp(0.8rem, 1.7vh, 1.25rem);
+  }
+
+  .practice-frame-body {
+    padding: var(--practice-body-pad-y) var(--practice-body-pad-x);
+  }
+
+  .practice-frame-footer {
+    padding: clamp(0.65rem, 1.35vh, 1rem) var(--practice-body-pad-x);
+  }
+
+  .practice-question-count {
+    margin-bottom: clamp(0.6rem, 1.35vh, 1rem);
+    font-size: clamp(0.86rem, 1.75vh, 1rem);
+    line-height: 1.2;
+  }
+
+  .practice-question-title {
+    font-size: clamp(0.72rem, 1.7vh, 0.88rem);
+    line-height: 1.15;
+    letter-spacing: clamp(0.08em, 0.42vw, 0.14em);
+  }
+
+  .practice-prompt {
+    margin-top: clamp(0.45rem, 1.1vh, 0.75rem);
+    font-size: var(--practice-prompt-size);
+    line-height: var(--practice-prompt-line);
+  }
+
+  .practice-choice-list {
+    display: grid;
+    gap: var(--practice-gap);
+    margin-top: clamp(0.85rem, 2.3vh, 1.75rem);
+  }
+
+  .practice-choice-option {
+    gap: clamp(0.6rem, 1.15vw, 0.9rem);
+    padding: var(--practice-option-pad-y) var(--practice-option-pad-x);
+    font-size: var(--practice-option-size);
+    line-height: 1.28;
+  }
+
+  .practice-option-key {
+    width: var(--practice-key-size);
+    height: var(--practice-key-size);
+    font-size: clamp(0.82rem, 1.7vh, 0.95rem);
+  }
+
+  .practice-action-row {
+    margin-top: clamp(0.75rem, 1.8vh, 1.5rem);
+    gap: clamp(0.45rem, 1vw, 0.75rem);
+  }
+
+  .practice-action-button {
+    min-height: clamp(2.35rem, 5vh, 3rem);
+    padding-inline: clamp(0.9rem, 1.8vw, 1.25rem);
+    font-size: clamp(0.9rem, 1.85vh, 1rem);
+  }
+
+  .practice-answer-panel {
+    padding: clamp(0.65rem, 1.35vh, 0.75rem) clamp(0.85rem, 1.8vw, 1rem);
+  }
+
+  .practice-feedback {
+    font-size: clamp(0.82rem, 1.72vh, 0.9rem);
+    line-height: 1.45;
+  }
+
+  .practice-checked-state {
+    margin-top: clamp(0.75rem, 1.8vh, 1.5rem);
+    gap: clamp(0.6rem, 1.3vh, 1rem);
+  }
+
+  .practice-label-chip {
+    min-height: clamp(2.2rem, 4.8vh, 2.75rem);
+    gap: clamp(0.45rem, 0.9vw, 0.65rem);
+    padding: clamp(0.38rem, 0.8vh, 0.5rem) clamp(0.65rem, 1.4vw, 0.85rem);
+    font-size: clamp(0.88rem, 1.85vh, 1rem);
+  }
+
+  .practice-classifier-body {
+    margin-top: clamp(0.7rem, 1.6vh, 1.4rem);
+  }
+
+  .practice-claim-grid {
+    display: grid;
+    gap: clamp(0.5rem, 1vh, 0.75rem);
+    margin-top: clamp(0.65rem, 1.45vh, 1rem);
+  }
+
+  .practice-claim-card {
+    padding: clamp(0.48rem, 1.05vh, 0.75rem) clamp(0.7rem, 1.45vw, 1rem);
+  }
+
+  .practice-claim-text {
+    font-size: clamp(0.78rem, 1.62vh, 0.92rem);
+    line-height: 1.35;
+  }
+
+  .practice-review-card {
+    padding: clamp(0.48rem, 1vh, 0.7rem) clamp(0.65rem, 1.25vw, 0.9rem);
+  }
+
+  .practice-review-claim {
+    font-size: clamp(0.72rem, 1.45vh, 0.82rem);
+    line-height: 1.28;
+  }
+
+  .practice-review-explanation {
+    font-size: clamp(0.68rem, 1.35vh, 0.78rem);
+    line-height: 1.3;
+  }
+}
+
+@media (min-width: 900px) {
+  .practice-claim-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (max-height: 760px) {
+  .practice-frame {
+    --practice-body-pad-y: 0.7rem;
+    --practice-gap: 0.48rem;
+    --practice-prompt-size: clamp(1.25rem, 3.15vh, 1.75rem);
+    --practice-option-size: clamp(0.9rem, 1.9vh, 1.02rem);
+    --practice-option-pad-y: 0.42rem;
+    --practice-key-size: 1.85rem;
+  }
+
+  .practice-choice-list {
+    margin-top: 0.8rem;
+  }
+
+  .practice-action-row {
+    margin-top: 0.75rem;
+  }
+}
+
+@media (max-height: 680px) and (min-width: 900px) {
+  .practice-choice-list {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}

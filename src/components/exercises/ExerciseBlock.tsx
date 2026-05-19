@@ -213,7 +213,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
   return (
     <section
       aria-labelledby={`${exerciseSet.unitSlug}-exercises-heading`}
-      className="relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-line bg-paper"
+      className="practice-frame relative flex h-full min-h-0 flex-col overflow-hidden rounded-lg border border-line bg-paper"
     >
       <div aria-hidden="true" className="absolute inset-x-0 top-0 h-1 bg-moss/20">
         <div
@@ -222,7 +222,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
         />
       </div>
 
-      <div className="flex items-center justify-between gap-3 px-5 pt-5 sm:px-7">
+      <div className="practice-frame-header flex items-center justify-between gap-3">
         <div className="min-w-0">
           <h2
             id={`${exerciseSet.unitSlug}-exercises-heading`}
@@ -247,9 +247,9 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
       </div>
 
       <div className="flex min-h-0 flex-1 flex-col">
-        <div className="min-h-0 flex-1 overflow-hidden px-5 py-6 sm:px-7 sm:py-8">
-          <div className="mx-auto w-full max-w-3xl">
-            <p className="mb-4 text-base font-semibold text-moss" aria-live="polite">
+        <div className="practice-frame-body min-h-0 flex-1 overflow-hidden">
+          <div className="mx-auto h-full min-h-0 w-full max-w-5xl">
+            <p className="practice-question-count font-semibold text-moss" aria-live="polite">
               {isComplete ? "Complete" : `${questionNumber} ->`}
               {!isComplete ? (
                 <span className="ml-2 text-sm font-medium text-slate-500">
@@ -289,12 +289,12 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
         </div>
 
         {!isComplete && activeExercise ? (
-          <div className="flex flex-col gap-3 border-t border-line bg-white/45 px-5 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-7">
+          <div className="practice-frame-footer flex flex-col gap-3 border-t border-line bg-white/45 sm:flex-row sm:items-center sm:justify-between">
             <button
               type="button"
               onClick={goToPrevious}
               disabled={activeIndex === 0}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-medium text-ink transition hover:border-moss hover:text-moss disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-medium text-ink transition hover:border-moss hover:text-moss disabled:cursor-not-allowed disabled:bg-slate-100 disabled:text-slate-400"
             >
               Back
             </button>
@@ -306,7 +306,7 @@ export function ExerciseBlock({ exerciseSet }: ExerciseBlockProps) {
             <button
               type="button"
               onClick={goToNext}
-              className="inline-flex h-10 items-center justify-center rounded-md border border-moss bg-moss px-4 text-sm font-medium text-white transition hover:bg-moss-dark"
+              className="inline-flex h-9 items-center justify-center rounded-md border border-moss bg-moss px-4 text-sm font-medium text-white transition hover:bg-moss-dark"
             >
               {activeIndex === exerciseCount - 1 ? "Finish" : "Next"}
             </button>

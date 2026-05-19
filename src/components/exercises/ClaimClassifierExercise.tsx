@@ -18,10 +18,10 @@ type ClaimClassifierExerciseProps = {
 };
 
 const actionButtonClass =
-  "inline-flex h-12 items-center justify-center rounded-md border px-5 text-base font-semibold transition";
+  "practice-action-button inline-flex items-center justify-center rounded-md border font-semibold transition";
 
 const labelChipClass =
-  "inline-flex min-h-11 items-center gap-2 rounded-md border px-3 py-2 text-base font-semibold transition";
+  "practice-label-chip inline-flex items-center rounded-md border font-semibold transition";
 
 function getOptionKey(index: number) {
   return String.fromCharCode(65 + index);
@@ -98,58 +98,108 @@ export function ClaimClassifierExercise({
       }}
     >
       <div>
-        <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+        <h3 className="practice-question-title font-semibold uppercase text-moss">
           {exercise.title}
         </h3>
-        <p className="mt-3 text-2xl leading-snug text-ink sm:text-3xl">
-          {exercise.prompt}
-        </p>
+        <p className="practice-prompt text-ink">{exercise.prompt}</p>
       </div>
 
       <p id={`${exercise.id}-interaction-help`} className="sr-only">
         Drag a label to a statement, or activate a label and then activate a statement.
       </p>
 
-      <div className="mt-6">
-        <div>
+      {state.checked ? (
+        <div className="practice-classifier-body">
           <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-            Labels
+            Checked classifications
           </p>
-          <div className="mt-3 flex flex-wrap gap-2">
-            {exercise.labels.map((label, index) => {
-              const isPicked = pickedLabel === label;
+          <div className="practice-claim-grid">
+            {exercise.claims.map((claim, index) => {
+              const selectedLabel = claimAnswers[String(index)] ?? "No label";
+              const isCorrect = selectedLabel === claim.correctLabel;
 
               return (
-                <button
-                  key={label}
-                  type="button"
-                  draggable
-                  aria-pressed={isPicked}
-                  onClick={() => togglePickedLabel(label)}
-                  onDragStart={(event) => handleLabelDragStart(event, label)}
-                  onDragEnd={() => setDraggedLabel(null)}
-                  className={[
-                    labelChipClass,
-                    isPicked
-                      ? "border-moss bg-moss text-white"
-                      : "border-moss/50 bg-white/70 text-ink hover:bg-moss/5"
-                  ].join(" ")}
+                <div
+                  key={claim.text}
+                  className="practice-review-card rounded-md border border-moss/40 bg-white/75"
                 >
-                  <span
-                    aria-hidden="true"
+                  <div className="flex items-start gap-2">
+                    <span
+                      aria-hidden="true"
+                      className="inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border border-moss/50 bg-white text-xs font-semibold text-moss"
+                    >
+                      {index + 1}
+                    </span>
+                    <p className="practice-review-claim text-ink">{claim.text}</p>
+                  </div>
+                  <div
                     className={[
-                      "inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border text-sm",
-                      isPicked ? "border-white/50" : "border-moss/60 bg-white text-moss"
+                      "practice-review-explanation mt-2 border-l-4 pl-3",
+                      isCorrect ? "border-moss text-ink" : "border-amber-400 text-amber-950"
                     ].join(" ")}
                   >
-                    {getOptionKey(index)}
-                  </span>
-                  {label}
-                </button>
+                    <p className="font-semibold">
+                      {isCorrect
+                        ? `Correct: ${selectedLabel}`
+                        : `Not quite. Best label: ${claim.correctLabel}`}
+                    </p>
+                    <p className="mt-0.5">{claim.explanation}</p>
+                  </div>
+                </div>
               );
             })}
           </div>
-          <div className="mt-3 flex flex-wrap items-center gap-3">
+          <button
+            type="button"
+            onClick={onTryAgain}
+            className="mt-3 inline-flex h-9 w-fit items-center justify-center rounded-md border border-line bg-white px-4 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
+          >
+            Try again
+          </button>
+        </div>
+      ) : (
+      <div className="practice-classifier-body">
+        <div className="flex flex-wrap items-end justify-between gap-3">
+          <div className="min-w-0">
+            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
+              Labels
+            </p>
+            <div className="mt-2 flex flex-wrap gap-2">
+              {exercise.labels.map((label, index) => {
+                const isPicked = pickedLabel === label;
+
+                return (
+                  <button
+                    key={label}
+                    type="button"
+                    draggable
+                    aria-pressed={isPicked}
+                    onClick={() => togglePickedLabel(label)}
+                    onDragStart={(event) => handleLabelDragStart(event, label)}
+                    onDragEnd={() => setDraggedLabel(null)}
+                    className={[
+                      labelChipClass,
+                      isPicked
+                        ? "border-moss bg-moss text-white"
+                        : "border-moss/50 bg-white/70 text-ink hover:bg-moss/5"
+                    ].join(" ")}
+                  >
+                    <span
+                      aria-hidden="true"
+                      className={[
+                        "inline-flex h-6 w-6 shrink-0 items-center justify-center rounded border text-sm",
+                        isPicked ? "border-white/50" : "border-moss/60 bg-white text-moss"
+                      ].join(" ")}
+                    >
+                      {getOptionKey(index)}
+                    </span>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+          <div className="flex flex-wrap items-center justify-end gap-2">
             <button
               type="button"
               disabled={!allClaimsAnswered}
@@ -158,25 +208,15 @@ export function ClaimClassifierExercise({
             >
               OK
             </button>
-            <span className="text-sm text-slate-500">
+            <span className="max-w-56 text-xs leading-4 text-slate-500">
               drag a label or click a label, then a statement
             </span>
-            {state.checked ? (
-              <button
-                type="button"
-                onClick={onTryAgain}
-                className={`${actionButtonClass} border-line bg-white text-ink hover:border-moss hover:text-moss`}
-              >
-                Try again
-              </button>
-            ) : null}
           </div>
         </div>
 
-        <div className="mt-4 grid gap-3 lg:grid-cols-2">
+        <div className="practice-claim-grid">
           {exercise.claims.map((claim, index) => {
             const selectedLabel = claimAnswers[String(index)] ?? "";
-            const isCorrect = selectedLabel === claim.correctLabel;
 
             return (
               <div key={claim.text}>
@@ -196,28 +236,28 @@ export function ClaimClassifierExercise({
                   onDragOver={(event) => event.preventDefault()}
                   onDrop={(event) => handleClaimDrop(event, index)}
                   className={[
-                    "group block h-full w-full rounded-md border px-4 py-3 text-left outline-none transition",
+                    "practice-claim-card group block h-full w-full rounded-md border text-left outline-none transition",
                     selectedLabel
                       ? "border-moss/50 bg-moss/5"
                       : "border-moss/40 bg-white/70 hover:bg-moss/5"
                   ].join(" ")}
                 >
-                  <span className="flex gap-3">
+                  <span className="flex gap-2">
                     <span
                       aria-hidden="true"
                       className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded border border-moss/50 bg-white text-sm font-semibold text-moss"
                     >
                       {index + 1}
                     </span>
-                    <span className="block text-sm leading-6 text-ink">{claim.text}</span>
+                    <span className="practice-claim-text block text-ink">{claim.text}</span>
                   </span>
-                  <span className="mt-3 flex flex-wrap items-center gap-2 pl-10">
+                  <span className="mt-2 flex flex-wrap items-center gap-2 pl-9">
                     <span className="text-xs font-semibold uppercase tracking-[0.12em] text-slate-500">
                       Match
                     </span>
                     <span
                       className={[
-                        "inline-flex min-h-9 items-center rounded-md border px-3 py-1 text-sm font-semibold transition",
+                        "inline-flex min-h-8 items-center rounded-md border px-3 py-1 text-sm font-semibold transition",
                         selectedLabel
                           ? "border-moss bg-white text-moss"
                           : "border-dashed border-moss/40 bg-paper/70 text-slate-500 group-hover:border-moss"
@@ -227,25 +267,12 @@ export function ClaimClassifierExercise({
                     </span>
                   </span>
                 </button>
-
-                {state.checked ? (
-                  <div
-                    className={[
-                      "mt-2 border-l-4 py-1 pl-3 text-xs leading-5",
-                      isCorrect ? "border-moss text-ink" : "border-amber-400 text-amber-950"
-                    ].join(" ")}
-                  >
-                    <p className="font-semibold">
-                      {isCorrect ? "Correct" : `Not quite. Best label: ${claim.correctLabel}`}
-                    </p>
-                    <p className="mt-1">{claim.explanation}</p>
-                  </div>
-                ) : null}
               </div>
             );
           })}
         </div>
       </div>
+      )}
     </article>
   );
 }
