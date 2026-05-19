@@ -94,18 +94,19 @@ a,
 }
 
 .pdf-viewer-shell:fullscreen {
+  display: flex;
+  flex-direction: column;
   width: 100vw;
   height: 100vh;
-  overflow: auto;
+  overflow: hidden;
   border: 0;
   border-radius: 0;
   background: #172033;
-  padding: 1rem;
+  padding: 0.75rem;
 }
 
 .pdf-viewer-shell:fullscreen .pdf-viewer-toolbar {
-  position: sticky;
-  top: 0;
+  flex: 0 0 auto;
   z-index: 20;
   border: 1px solid #d9dee7;
   border-radius: 8px;
@@ -115,6 +116,13 @@ a,
 }
 
 .pdf-viewer-shell:fullscreen .pdf-page {
-  min-height: calc(100vh - 7rem);
+  display: flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: center;
+  min-height: 0;
+  margin-top: 0.75rem;
+  overflow: hidden;
+  padding: 1rem;
   background: #0f172a;
 }

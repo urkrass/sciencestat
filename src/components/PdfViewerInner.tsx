@@ -59,12 +59,18 @@ function clamp(value: number, min: number, max: number) {
   return Math.min(Math.max(value, min), max);
 }
 
+type ReaderSize = {
+  height: number;
+  width: number;
+};
+
 export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<HTMLDivElement>(null);
   const flipBookRef = useRef<FlipBookRef | null>(null);
   const wheelDeltaRef = useRef(0);
   const [containerWidth, setContainerWidth] = useState(760);
+  const [readerSize, setReaderSize] = useState<ReaderSize>({ height: 0, width: 0 });
   const [numPages, setNumPages] = useState<number | null>(null);
   const [pageNumber, setPageNumber] = useState(1);
   const [scale, setScale] = useState(1);
@@ -95,6 +101,28 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
   }, [isFullscreen]);
 
   useEffect(() => {
+    const node = readerRef.current;
+    if (!node) {
+      return;
+    }
+
+    const updateReaderSize = () => {
+      const rect = node.getBoundingClientRect();
+      setReaderSize({
+        height: Math.floor(rect.height),
+        width: Math.floor(rect.width)
+      });
+    };
+
+    updateReaderSize();
+
+    const observer = new ResizeObserver(updateReaderSize);
+    observer.observe(node);
+
+    return () => observer.disconnect();
+  }, [isFullscreen, loadError, numPages]);
+
+  useEffect(() => {
     const syncFullscreenState = () => {
       setIsFullscreen(document.fullscreenElement === containerRef.current);
     };
@@ -112,13 +140,26 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
     flipBookRef.current?.pageFlip?.()?.turnToPage(0);
   }, [file]);
 
-  const basePageWidth = useMemo(() => {
-    const hasSpreadRoom = containerWidth >= 760;
-    const availablePageWidth = hasSpreadRoom ? (containerWidth - 48) / 2 : containerWidth - 24;
-    const maxPageWidth = isFullscreen ? 680 : 560;
+  const readerWidth = isFullscreen && readerSize.width ? readerSize.width : containerWidth;
+  const shouldUsePortrait = readerWidth < 760;
 
-    return clamp(Math.floor(availablePageWidth * scale), 240, maxPageWidth);
-  }, [containerWidth, isFullscreen, scale]);
+  const basePageWidth = useMemo(() => {
+    const horizontalPadding = isFullscreen ? 32 : 24;
+    const hasSpreadRoom = !shouldUsePortrait;
+    const availablePageWidth = hasSpreadRoom
+      ? (readerWidth - horizontalPadding * 2 - 16) / 2
+      : readerWidth - horizontalPadding;
+    const availablePageHeight =
+      isFullscreen && readerSize.height ? (readerSize.height - 40) / pageAspectRatio : Infinity;
+    const maxPageWidth = isFullscreen ? 680 : 560;
+    const minPageWidth = isFullscreen ? 160 : 240;
+
+    return clamp(
+      Math.floor(Math.min(availablePageWidth * scale, availablePageHeight, maxPageWidth)),
+      minPageWidth,
+      maxPageWidth
+    );
+  }, [isFullscreen, pageAspectRatio, readerSize.height, readerWidth, scale, shouldUsePortrait]);
 
   const pageHeight = useMemo(
     () => Math.max(320, Math.round(basePageWidth * pageAspectRatio)),
@@ -344,7 +385,7 @@ export default function PdfViewerInner({ file, title }: PdfViewerProps) {
                 style={{ margin: "0 auto" }}
                 swipeDistance={36}
                 useMouseEvents
-                usePortrait
+                usePortrait={shouldUsePortrait}
                 width={basePageWidth}
               >
                 {Array.from({ length: numPages }, (_, index) => {
