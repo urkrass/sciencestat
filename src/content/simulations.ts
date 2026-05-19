@@ -20,16 +20,18 @@ export const simulations: Simulation[] = [
   {
     slug: "confidence-intervals",
     title: "Confidence intervals",
-    status: "comingSoon",
+    status: "available",
     description:
-      "See how often confidence intervals capture the true parameter over repeated sampling."
+      "See how often confidence intervals capture the true parameter over repeated sampling.",
+    href: "/courses/statistics-for-scientific-claims/simulations/confidence-intervals"
   },
   {
     slug: "p-value-null-model",
     title: "P-value under a null model",
-    status: "comingSoon",
+    status: "available",
     description:
-      "Simulate results under a null hypothesis and compare an observed statistic to the null distribution."
+      "Simulate results under a null hypothesis and compare an observed statistic to the null distribution.",
+    href: "/courses/statistics-for-scientific-claims/simulations/p-value-null-model"
   }
 ];
 
