@@ -49,12 +49,12 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
   const maxCount = Math.max(...bins.map((bin) => bin.count), 1);
 
   const width = 760;
-  const height = 330;
+  const height = 410;
   const margin = {
-    top: 24,
-    right: 24,
-    bottom: 58,
-    left: 62
+    top: 34,
+    right: 28,
+    bottom: 62,
+    left: 64
   };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -74,13 +74,13 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
       className="h-auto w-full overflow-visible"
     >
       <title>Histogram of sample means</title>
-      <rect width={width} height={height} rx="8" fill="#fbfbf8" />
+      <rect width={width} height={height} rx="8" fill="#f9faf6" />
       <line
         x1={margin.left}
         x2={margin.left + innerWidth}
         y1={margin.top + innerHeight}
         y2={margin.top + innerHeight}
-        stroke="#73819a"
+        stroke="#8b98aa"
         strokeWidth="1"
       />
       <line
@@ -88,7 +88,7 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
         x2={margin.left}
         y1={margin.top}
         y2={margin.top + innerHeight}
-        stroke="#73819a"
+        stroke="#8b98aa"
         strokeWidth="1"
       />
       {bins.map((bin) => {
@@ -104,8 +104,8 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
             y={barY}
             width={Math.max(1, nextX - barX - 2)}
             height={barHeight}
-            fill="#2f6f5f"
-            opacity="0.78"
+            fill="#367765"
+            opacity="0.82"
           />
         );
       })}
@@ -114,7 +114,7 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
         x2={referenceX}
         y1={margin.top - 2}
         y2={margin.top + innerHeight}
-        stroke="#8f4d2c"
+        stroke="#9a5a32"
         strokeWidth="2"
         strokeDasharray="5 5"
       />
@@ -122,7 +122,7 @@ export function Histogram({ values, referenceValue, xLabel, yLabel }: HistogramP
         x={referenceX}
         y={margin.top - 7}
         textAnchor="middle"
-        fill="#8f4d2c"
+        fill="#9a5a32"
         fontSize="13"
         fontWeight="600"
       >
