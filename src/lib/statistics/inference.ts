@@ -2,6 +2,7 @@ import { createSeededRandom, randomNormal } from "@/lib/statistics/random";
 import { mean } from "@/lib/statistics/summary";
 
 export type ConfidenceLevel = 90 | 95 | 99;
+export type TailMode = "twoSided" | "greater" | "less";
 
 export type ConfidenceInterval = {
   sampleMean: number;
@@ -106,6 +107,15 @@ export function simulatedTwoSidedPValue(
   nullMean: number,
   observedMean: number
 ) {
+  return simulatedPValue(simulatedMeans, nullMean, observedMean, "twoSided");
+}
+
+export function simulatedPValue(
+  simulatedMeans: number[],
+  nullMean: number,
+  observedMean: number,
+  tailMode: TailMode
+) {
   if (simulatedMeans.length === 0) {
     return {
       pValue: Number.NaN,
@@ -114,9 +124,17 @@ export function simulatedTwoSidedPValue(
   }
 
   const observedDistance = Math.abs(observedMean - nullMean);
-  const extremeCount = simulatedMeans.filter(
-    (sampleMean) => Math.abs(sampleMean - nullMean) >= observedDistance
-  ).length;
+  const extremeCount = simulatedMeans.filter((sampleMean) => {
+    if (tailMode === "greater") {
+      return sampleMean >= observedMean;
+    }
+
+    if (tailMode === "less") {
+      return sampleMean <= observedMean;
+    }
+
+    return Math.abs(sampleMean - nullMean) >= observedDistance;
+  }).length;
 
   return {
     pValue: extremeCount / simulatedMeans.length,

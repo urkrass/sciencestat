@@ -4,6 +4,12 @@ import { useEffect, useRef, useState } from "react";
 import { ConfidenceIntervalPlot } from "@/components/simulations/ConfidenceIntervalPlot";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
+  DirtySimulationNotice,
+  FormulaStrip,
+  SimulationLegend,
+  TryThisPrompt
+} from "@/components/simulations/SimulationAnnotations";
+import {
   criticalValueForConfidenceLevel,
   generateConfidenceIntervals,
   type ConfidenceInterval,
@@ -76,6 +82,16 @@ function getCoverageInterpretation(result: ConfidenceResult) {
   return "This run captured the true mean more often than the nominal level. Repeated simulation runs will vary around the long-run coverage.";
 }
 
+function controlsMatchResult(controls: ConfidenceControls, result: ConfidenceResult) {
+  return (
+    controls.sampleSize === result.controls.sampleSize &&
+    controls.repeatedIntervals === result.controls.repeatedIntervals &&
+    controls.populationSd === result.controls.populationSd &&
+    controls.confidenceLevel === result.controls.confidenceLevel &&
+    controls.seed === result.controls.seed
+  );
+}
+
 export function ConfidenceIntervalsSimulation() {
   const [controls, setControls] = useState<ConfidenceControls>(defaultControls);
   const [result, setResult] = useState(() => createConfidenceResult(defaultControls));
@@ -137,6 +153,13 @@ export function ConfidenceIntervalsSimulation() {
     updateControls("seed", Math.floor(Math.random() * 999999) + 1);
   };
 
+  const isDirty = !controlsMatchResult(controls, result);
+  const displayedIntervalCount = Math.min(80, result.intervals.length);
+  const intervalDisplayNote =
+    result.intervals.length > 80
+      ? "Showing up to 80 intervals; coverage is calculated from all simulated intervals."
+      : "Coverage is calculated from all displayed intervals.";
+
   const summaryItems = [
     {
       label: "Intervals covering mean",
@@ -151,8 +174,12 @@ export function ConfidenceIntervalsSimulation() {
       value: `${result.controls.confidenceLevel}%`
     },
     {
-      label: "Average interval width",
+      label: "Average full interval width",
       value: roundTo(result.averageWidth, 2)
+    },
+    {
+      label: "Average margin of error",
+      value: roundTo(result.averageWidth / 2, 2)
     }
   ];
 
@@ -166,6 +193,30 @@ export function ConfidenceIntervalsSimulation() {
           Controls
         </h2>
         <div className="mt-4 space-y-4">
+          <TryThisPrompt>
+            switch from 90% to 99% and run again. Watch what happens to coverage
+            and interval width.
+          </TryThisPrompt>
+
+          <div className="grid grid-cols-[1fr_7.75rem] gap-2">
+            <button
+              type="button"
+              aria-label="Run simulation"
+              disabled={isRunning}
+              onClick={runSimulation}
+              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
+            >
+              {isRunning ? "Running" : "Run"}
+            </button>
+            <button
+              type="button"
+              onClick={resetSimulation}
+              className="h-10 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
+            >
+              Reset defaults
+            </button>
+          </div>
+
           <fieldset>
             <legend className="text-sm font-semibold text-ink">
               Confidence level
@@ -249,24 +300,6 @@ export function ConfidenceIntervalsSimulation() {
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_5.5rem] gap-2 pt-1">
-            <button
-              type="button"
-              aria-label="Run simulation"
-              disabled={isRunning}
-              onClick={runSimulation}
-              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-            >
-              {isRunning ? "Running" : "Run"}
-            </button>
-            <button
-              type="button"
-              onClick={resetSimulation}
-              className="h-10 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
-            >
-              Reset
-            </button>
-          </div>
         </div>
       </section>
 
@@ -279,6 +312,30 @@ export function ConfidenceIntervalsSimulation() {
             <p className="mt-1 text-sm leading-6 text-slate-600">
               Each line is one simulated confidence interval for the mean.
             </p>
+            <div className="mt-2">
+              <FormulaStrip>
+                CI = sample mean ± critical value × σ / √n
+              </FormulaStrip>
+            </div>
+            <div className="mt-2">
+              <SimulationLegend
+                items={[
+                  { label: "captures true mean", swatchClassName: "bg-[#367765]" },
+                  { label: "misses true mean", swatchClassName: "bg-[#b25b35]" },
+                  {
+                    label: "dashed line = true mean",
+                    swatchClassName: "bg-transparent",
+                    lineClassName: "border-t-2 border-dashed border-[#9a5a32]"
+                  }
+                ]}
+              />
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-500">
+              {intervalDisplayNote} Currently displaying {displayedIntervalCount}.
+            </p>
+            <div className="mt-2">
+              <DirtySimulationNotice isDirty={isDirty} />
+            </div>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
             Mean = 50

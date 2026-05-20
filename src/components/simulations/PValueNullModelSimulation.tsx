@@ -4,18 +4,32 @@ import { useEffect, useRef, useState } from "react";
 import { NullModelHistogram } from "@/components/simulations/NullModelHistogram";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
+  DirtySimulationNotice,
+  FormulaStrip,
+  SimulationLegend,
+  TryThisPrompt
+} from "@/components/simulations/SimulationAnnotations";
+import {
   generateNullModelMeans,
-  simulatedTwoSidedPValue
+  simulatedPValue,
+  type TailMode
 } from "@/lib/statistics/inference";
 import { roundTo, sampleStandardDeviation } from "@/lib/statistics/summary";
 
 const NULL_MEAN = 50;
+
+const tailModeOptions: { value: TailMode; label: string }[] = [
+  { value: "twoSided", label: "Two-tailed" },
+  { value: "greater", label: "Greater than" },
+  { value: "less", label: "Less than" }
+];
 
 type PValueControls = {
   observedMean: number;
   sampleSize: number;
   simulatedSamples: number;
   populationSd: number;
+  tailMode: TailMode;
   seed: number;
 };
 
@@ -24,6 +38,7 @@ const defaultControls: PValueControls = {
   sampleSize: 16,
   simulatedSamples: 1000,
   populationSd: 10,
+  tailMode: "twoSided",
   seed: 13579
 };
 
@@ -43,10 +58,11 @@ function createPValueResult(controls: PValueControls): PValueResult {
     populationSd: controls.populationSd,
     seed: controls.seed
   });
-  const { pValue, extremeCount } = simulatedTwoSidedPValue(
+  const { pValue, extremeCount } = simulatedPValue(
     simulatedMeans,
     NULL_MEAN,
-    controls.observedMean
+    controls.observedMean,
+    controls.tailMode
   );
 
   return {
@@ -56,6 +72,43 @@ function createPValueResult(controls: PValueControls): PValueResult {
     pValue,
     nullSd: sampleStandardDeviation(simulatedMeans)
   };
+}
+
+function controlsMatchResult(controls: PValueControls, result: PValueResult) {
+  return (
+    controls.observedMean === result.controls.observedMean &&
+    controls.sampleSize === result.controls.sampleSize &&
+    controls.simulatedSamples === result.controls.simulatedSamples &&
+    controls.populationSd === result.controls.populationSd &&
+    controls.tailMode === result.controls.tailMode &&
+    controls.seed === result.controls.seed
+  );
+}
+
+function getPValueLabel(tailMode: TailMode) {
+  if (tailMode === "greater") {
+    return "Greater-than simulated p-value";
+  }
+
+  if (tailMode === "less") {
+    return "Less-than simulated p-value";
+  }
+
+  return "Two-tailed simulated p-value";
+}
+
+function getExtremeRule(tailMode: TailMode, observedMean: number) {
+  const observedText = roundTo(observedMean, 1);
+
+  if (tailMode === "greater") {
+    return `Extreme rule: simulated mean ≥ observed sample mean (${observedText}).`;
+  }
+
+  if (tailMode === "less") {
+    return `Extreme rule: simulated mean ≤ observed sample mean (${observedText}).`;
+  }
+
+  return `Extreme rule: |simulated mean − 50| ≥ |${observedText} − 50|.`;
 }
 
 function getPValueInterpretation(result: PValueResult) {
@@ -68,7 +121,7 @@ function getPValueInterpretation(result: PValueResult) {
   }
 
   if (result.pValue < 0.15) {
-    return "The observed mean is somewhat unusual under the null model, but the simulation does not show strong evidence by conventional thresholds.";
+    return "The observed sample mean is somewhat unusual under the null model, but the simulation does not show strong evidence by conventional thresholds.";
   }
 
   return "Results this extreme are fairly common under the null model. The simulation does not provide strong evidence against the null.";
@@ -135,9 +188,11 @@ export function PValueNullModelSimulation() {
     updateControls("seed", Math.floor(Math.random() * 999999) + 1);
   };
 
+  const isDirty = !controlsMatchResult(controls, result);
+
   const summaryItems = [
     {
-      label: "Simulated p-value",
+      label: getPValueLabel(result.controls.tailMode),
       value: roundTo(result.pValue, 3)
     },
     {
@@ -145,11 +200,11 @@ export function PValueNullModelSimulation() {
       value: `${result.extremeCount}/${result.controls.simulatedSamples}`
     },
     {
-      label: "Observed mean",
+      label: "Observed sample mean",
       value: roundTo(result.controls.observedMean, 1)
     },
     {
-      label: "Null-model SD",
+      label: "Null distribution SD",
       value: roundTo(result.nullSd, 2)
     }
   ];
@@ -164,9 +219,59 @@ export function PValueNullModelSimulation() {
           Controls
         </h2>
         <div className="mt-4 space-y-4">
+          <TryThisPrompt>
+            move the observed sample mean farther from 50 and run again. Watch how
+            the tail area changes.
+          </TryThisPrompt>
+
+          <div className="grid grid-cols-[1fr_7.75rem] gap-2">
+            <button
+              type="button"
+              aria-label="Run simulation"
+              disabled={isRunning}
+              onClick={runSimulation}
+              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
+            >
+              {isRunning ? "Running" : "Run"}
+            </button>
+            <button
+              type="button"
+              onClick={resetSimulation}
+              className="h-10 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
+            >
+              Reset defaults
+            </button>
+          </div>
+
+          <fieldset>
+            <legend className="text-sm font-semibold text-ink">Tail mode</legend>
+            <div className="mt-2 grid grid-cols-3 gap-1 rounded-md border border-line bg-white p-1">
+              {tailModeOptions.map((option) => {
+                const isSelected = controls.tailMode === option.value;
+
+                return (
+                  <button
+                    key={option.value}
+                    type="button"
+                    aria-pressed={isSelected}
+                    onClick={() => updateControls("tailMode", option.value)}
+                    className={[
+                      "h-8 rounded-[5px] px-2 text-xs font-medium transition",
+                      isSelected
+                        ? "bg-moss text-white shadow-sm"
+                        : "text-ink hover:bg-paper hover:text-moss"
+                    ].join(" ")}
+                  >
+                    {option.label}
+                  </button>
+                );
+              })}
+            </div>
+          </fieldset>
+
           <NumberSlider
             id="pvalue-observed-mean"
-            label="Observed mean"
+            label="Observed sample mean"
             min={42}
             max={58}
             step={0.1}
@@ -228,24 +333,6 @@ export function PValueNullModelSimulation() {
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_5.5rem] gap-2 pt-1">
-            <button
-              type="button"
-              aria-label="Run simulation"
-              disabled={isRunning}
-              onClick={runSimulation}
-              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-            >
-              {isRunning ? "Running" : "Run"}
-            </button>
-            <button
-              type="button"
-              onClick={resetSimulation}
-              className="h-10 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
-            >
-              Reset
-            </button>
-          </div>
         </div>
       </section>
 
@@ -256,8 +343,38 @@ export function PValueNullModelSimulation() {
               Null model
             </h2>
             <p className="mt-1 text-sm leading-6 text-slate-600">
-              The shaded tails are simulated results at least as extreme as the observed mean.
+              The shaded region marks null simulations counted as at least as extreme as the observed sample mean.
             </p>
+            <div className="mt-2">
+              <FormulaStrip>
+                p = proportion of null simulations at least as extreme as the
+                observed statistic
+              </FormulaStrip>
+            </div>
+            <div className="mt-2">
+              <SimulationLegend
+                items={[
+                  { label: "ordinary null simulations", swatchClassName: "bg-[#367765]" },
+                  { label: "counted as extreme", swatchClassName: "bg-[#b25b35]" },
+                  {
+                    label: "dashed green line = null mean",
+                    swatchClassName: "bg-transparent",
+                    lineClassName: "border-t-2 border-dashed border-moss"
+                  },
+                  {
+                    label: "brown line = observed sample mean",
+                    swatchClassName: "bg-transparent",
+                    lineClassName: "bg-[#9a5a32]"
+                  }
+                ]}
+              />
+            </div>
+            <p className="mt-2 text-xs font-medium leading-5 text-slate-600">
+              {getExtremeRule(result.controls.tailMode, result.controls.observedMean)}
+            </p>
+            <div className="mt-2">
+              <DirtySimulationNotice isDirty={isDirty} />
+            </div>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
             Null mean = 50
@@ -275,6 +392,7 @@ export function PValueNullModelSimulation() {
               animationKey={animationKey}
               nullMean={NULL_MEAN}
               observedMean={result.controls.observedMean}
+              tailMode={result.controls.tailMode}
               values={result.simulatedMeans}
             />
           </div>

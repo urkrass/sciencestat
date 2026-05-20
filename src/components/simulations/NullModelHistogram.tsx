@@ -1,9 +1,11 @@
+import type { TailMode } from "@/lib/statistics/inference";
 import { roundTo } from "@/lib/statistics/summary";
 
 type NullModelHistogramProps = {
   values: number[];
   nullMean: number;
   observedMean: number;
+  tailMode: TailMode;
   animationKey: number;
 };
 
@@ -35,11 +37,18 @@ export function NullModelHistogram({
   values,
   nullMean,
   observedMean,
+  tailMode,
   animationKey
 }: NullModelHistogramProps) {
   const observedDistance = Math.abs(observedMean - nullMean);
-  const rawMin = Math.min(nullMean - observedDistance, observedMean, ...values);
-  const rawMax = Math.max(nullMean + observedDistance, observedMean, ...values);
+  const rawMin =
+    tailMode === "twoSided"
+      ? Math.min(nullMean - observedDistance, observedMean, ...values)
+      : Math.min(nullMean, observedMean, ...values);
+  const rawMax =
+    tailMode === "twoSided"
+      ? Math.max(nullMean + observedDistance, observedMean, ...values)
+      : Math.max(nullMean, observedMean, ...values);
   const rawRange = rawMax - rawMin || 1;
   const min = rawMin - rawRange * 0.08;
   const max = rawMax + rawRange * 0.08;
@@ -64,15 +73,33 @@ export function NullModelHistogram({
 
   const nullX = xScale(nullMean);
   const observedX = xScale(observedMean);
+  const tailLabel =
+    tailMode === "greater"
+      ? "greater-than tail"
+      : tailMode === "less"
+        ? "less-than tail"
+        : "two-tailed extremes";
+
+  const isExtremeBin = (binCenter: number) => {
+    if (tailMode === "greater") {
+      return binCenter >= observedMean;
+    }
+
+    if (tailMode === "less") {
+      return binCenter <= observedMean;
+    }
+
+    return Math.abs(binCenter - nullMean) >= observedDistance;
+  };
 
   return (
     <svg
       role="img"
-      aria-label="Null model histogram with lines for the null mean and observed mean"
+      aria-label={`Null model histogram with ${tailLabel} shaded, a dashed line for the null mean, and a line for the observed sample mean`}
       viewBox={`0 0 ${width} ${height}`}
       className="h-auto w-full overflow-visible"
     >
-      <title>Null model simulation</title>
+      <title>Null model simulation: {tailLabel}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
       <line
         x1={margin.left}
@@ -92,7 +119,7 @@ export function NullModelHistogram({
       />
       {bins.map((bin, index) => {
         const binCenter = (bin.start + bin.end) / 2;
-        const isExtreme = Math.abs(binCenter - nullMean) >= observedDistance;
+        const isExtreme = isExtremeBin(binCenter);
         const barX = xScale(bin.start);
         const nextX = xScale(bin.end);
         const barY = yScale(bin.count);
