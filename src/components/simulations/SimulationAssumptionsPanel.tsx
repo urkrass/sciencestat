@@ -8,7 +8,7 @@ export function SimulationAssumptionsPanel({
   note
 }: SimulationAssumptionsPanelProps) {
   return (
-    <details className="rounded-md border border-line bg-white/85 p-2 text-xs text-slate-700">
+    <details className="border-t border-line pt-2 text-xs text-slate-700">
       <summary className="cursor-pointer font-semibold uppercase tracking-[0.12em] text-moss">
         Model assumptions
       </summary>

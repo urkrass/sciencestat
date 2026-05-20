@@ -22,7 +22,7 @@ export function GeneratedConclusion({ conclusion }: GeneratedConclusionProps) {
   };
 
   return (
-    <section className="rounded-md border border-line bg-white p-2">
+    <section>
       <div className="flex flex-wrap items-center justify-between gap-2">
         <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
           Step 4: Write / copy conclusion
@@ -42,7 +42,7 @@ export function GeneratedConclusion({ conclusion }: GeneratedConclusionProps) {
       </div>
       <p
         aria-label="Generated defensible conclusion"
-        className="mt-2 select-text rounded-md border border-line bg-paper/70 px-3 py-2 text-xs leading-4 text-ink"
+        className="mt-2 select-text border-l-2 border-moss pl-3 text-xs leading-5 text-ink"
       >
         {conclusion}
       </p>

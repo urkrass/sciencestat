@@ -13,7 +13,7 @@ const options: { value: Exclude<SamplingPrediction, null>; label: string }[] = [
 
 export function PredictionPrompt({ value, onChange }: PredictionPromptProps) {
   return (
-    <section className="rounded-md border border-line bg-white/85 p-2">
+    <section className="border-t border-line pt-2">
       <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
         Step 1: Prediction
       </h3>
@@ -35,7 +35,7 @@ export function PredictionPrompt({ value, onChange }: PredictionPromptProps) {
                 "min-h-8 rounded-md border px-2 text-center text-[0.68rem] font-semibold transition",
                 isSelected
                   ? "border-moss bg-moss text-white"
-                  : "border-line bg-white text-ink hover:border-moss hover:text-moss"
+                  : "border-line bg-transparent text-ink hover:border-moss hover:text-moss"
               ].join(" ")}
             >
               {option.label}

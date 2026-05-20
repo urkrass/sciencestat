@@ -24,7 +24,7 @@ type SimulationLegendProps = {
 
 export function FormulaStrip({ children }: FormulaStripProps) {
   return (
-    <div className="rounded-md border border-line bg-paper px-3 py-1.5 text-xs font-semibold text-slate-700">
+    <div className="border-l-2 border-moss pl-3 text-xs font-semibold text-slate-700">
       {children}
     </div>
   );
@@ -32,7 +32,7 @@ export function FormulaStrip({ children }: FormulaStripProps) {
 
 export function TryThisPrompt({ children }: TryThisPromptProps) {
   return (
-    <p className="rounded-md border border-line bg-white/80 px-3 py-1.5 text-xs leading-[1.45] text-slate-600">
+    <p className="border-l-2 border-line pl-3 text-xs leading-[1.45] text-slate-600">
       <span className="font-semibold text-moss">Try this:</span> {children}
     </p>
   );
@@ -46,7 +46,7 @@ export function DirtySimulationNotice({ isDirty }: DirtySimulationNoticeProps) {
   return (
     <p
       role="status"
-      className="rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900"
+      className="border-l-2 border-amber-500 pl-3 text-xs font-medium text-amber-900"
     >
       Settings changed - click Run to update the simulation.
     </p>
