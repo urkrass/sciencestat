@@ -7,6 +7,9 @@ type NullModelHistogramProps = {
   observedMean: number;
   tailMode: TailMode;
   animationKey: number;
+  compact?: boolean;
+  ariaLabel?: string;
+  title?: string;
 };
 
 type HistogramBin = {
@@ -14,6 +17,10 @@ type HistogramBin = {
   end: number;
   count: number;
 };
+
+function svgNumber(value: number) {
+  return Number.isFinite(value) ? Number(value.toFixed(3)) : 0;
+}
 
 function buildBins(values: number[], min: number, max: number): HistogramBin[] {
   const binCount = Math.min(28, Math.max(14, Math.round(Math.sqrt(values.length))));
@@ -38,7 +45,10 @@ export function NullModelHistogram({
   nullMean,
   observedMean,
   tailMode,
-  animationKey
+  animationKey,
+  compact = false,
+  ariaLabel,
+  title
 }: NullModelHistogramProps) {
   const observedDistance = Math.abs(observedMean - nullMean);
   const rawMin =
@@ -56,20 +66,20 @@ export function NullModelHistogram({
   const maxCount = Math.max(...bins.map((bin) => bin.count), 1);
 
   const width = 760;
-  const height = 410;
+  const height = compact ? 330 : 410;
   const margin = {
-    top: 34,
+    top: compact ? 30 : 34,
     right: 28,
-    bottom: 62,
+    bottom: compact ? 54 : 62,
     left: 64
   };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
   const xScale = (value: number) =>
-    margin.left + ((value - min) / (max - min)) * innerWidth;
+    svgNumber(margin.left + ((value - min) / (max - min)) * innerWidth);
   const yScale = (count: number) =>
-    margin.top + innerHeight - (count / maxCount) * innerHeight;
+    svgNumber(margin.top + innerHeight - (count / maxCount) * innerHeight);
 
   const nullX = xScale(nullMean);
   const observedX = xScale(observedMean);
@@ -95,11 +105,14 @@ export function NullModelHistogram({
   return (
     <svg
       role="img"
-      aria-label={`Null model histogram with ${tailLabel} shaded, a dashed line for the null mean, and a line for the observed sample mean`}
+      aria-label={
+        ariaLabel ??
+        `Null model histogram with ${tailLabel} shaded, a dashed line for the null mean, and a line for the observed sample mean`
+      }
       viewBox={`0 0 ${width} ${height}`}
       className="h-auto w-full overflow-visible"
     >
-      <title>Null model simulation: {tailLabel}</title>
+      <title>{title ?? `Null model simulation: ${tailLabel}`}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
       <line
         x1={margin.left}

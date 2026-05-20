@@ -5,14 +5,24 @@ type ConfidenceIntervalPlotProps = {
   intervals: ConfidenceInterval[];
   trueMean: number;
   animationKey: number;
+  compact?: boolean;
+  ariaLabel?: string;
+  title?: string;
 };
+
+function svgNumber(value: number) {
+  return Number.isFinite(value) ? Number(value.toFixed(3)) : 0;
+}
 
 export function ConfidenceIntervalPlot({
   intervals,
   trueMean,
-  animationKey
+  animationKey,
+  compact = false,
+  ariaLabel = "Simulated confidence intervals with a vertical line marking the true population mean",
+  title = "Confidence interval coverage plot"
 }: ConfidenceIntervalPlotProps) {
-  const visibleIntervals = intervals.slice(0, 80);
+  const visibleIntervals = intervals.slice(0, compact ? 60 : 80);
   const rawMin = Math.min(trueMean, ...visibleIntervals.map((interval) => interval.lower));
   const rawMax = Math.max(trueMean, ...visibleIntervals.map((interval) => interval.upper));
   const rawRange = rawMax - rawMin || 1;
@@ -20,11 +30,11 @@ export function ConfidenceIntervalPlot({
   const max = rawMax + rawRange * 0.08;
 
   const width = 760;
-  const height = 410;
+  const height = compact ? 330 : 410;
   const margin = {
-    top: 40,
+    top: compact ? 34 : 40,
     right: 28,
-    bottom: 58,
+    bottom: compact ? 52 : 58,
     left: 64
   };
   const innerWidth = width - margin.left - margin.right;
@@ -32,17 +42,17 @@ export function ConfidenceIntervalPlot({
   const rowGap = innerHeight / Math.max(visibleIntervals.length - 1, 1);
 
   const xScale = (value: number) =>
-    margin.left + ((value - min) / (max - min)) * innerWidth;
+    svgNumber(margin.left + ((value - min) / (max - min)) * innerWidth);
   const trueMeanX = xScale(trueMean);
 
   return (
     <svg
       role="img"
-      aria-label="Simulated confidence intervals with a vertical line marking the true population mean"
+      aria-label={ariaLabel}
       viewBox={`0 0 ${width} ${height}`}
       className="h-auto w-full overflow-visible"
     >
-      <title>Confidence interval coverage plot</title>
+      <title>{title}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
       <line
         x1={margin.left}

@@ -2,10 +2,15 @@ import type { SamplingComparisonResult } from "@/lib/statistics/comparison";
 import { roundTo } from "@/lib/statistics/summary";
 
 type SimulationExportButtonsProps = {
-  comparison: SamplingComparisonResult;
+  comparison?: SamplingComparisonResult;
+  csv?: string;
+  filename?: string;
+  label?: string;
 };
 
-function csvEscape(value: string | number) {
+export type CsvCell = string | number;
+
+function csvEscape(value: CsvCell) {
   const text = String(value);
 
   if (/[",\n\r]/.test(text)) {
@@ -13,6 +18,13 @@ function csvEscape(value: string | number) {
   }
 
   return text;
+}
+
+export function buildCsvFromRows(header: string[], rows: CsvCell[][]) {
+  return [
+    header.join(","),
+    ...rows.map((row) => row.map(csvEscape).join(","))
+  ].join("\n");
 }
 
 function buildSamplingComparisonCsv(comparison: SamplingComparisonResult) {
@@ -32,10 +44,9 @@ function buildSamplingComparisonCsv(comparison: SamplingComparisonResult) {
     ["B", comparison.scenarioB]
   ] as const;
 
-  return [
-    header.join(","),
-    ...rows.map(([scenario, result]) =>
-      [
+  return buildCsvFromRows(
+    header,
+    rows.map(([scenario, result]) => [
         scenario,
         result.controls.distribution,
         result.controls.sampleSize,
@@ -45,23 +56,23 @@ function buildSamplingComparisonCsv(comparison: SamplingComparisonResult) {
         roundTo(result.sampleMeanAverage, 4),
         roundTo(result.sampleMeanSd, 4),
         roundTo(result.expectedStandardError, 4)
-      ]
-        .map(csvEscape)
-        .join(",")
-    )
-  ].join("\n");
+      ])
+  );
 }
 
 export function SimulationExportButtons({
-  comparison
+  comparison,
+  csv,
+  filename = "simulation-comparison.csv",
+  label = "Download comparison CSV"
 }: SimulationExportButtonsProps) {
   const downloadCsv = () => {
-    const csv = buildSamplingComparisonCsv(comparison);
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8" });
+    const csvText = csv ?? (comparison ? buildSamplingComparisonCsv(comparison) : "");
+    const blob = new Blob([csvText], { type: "text/csv;charset=utf-8" });
     const url = URL.createObjectURL(blob);
     const link = document.createElement("a");
     link.href = url;
-    link.download = "sampling-comparison.csv";
+    link.download = comparison && !csv ? "sampling-comparison.csv" : filename;
     document.body.append(link);
     link.click();
     link.remove();
@@ -74,7 +85,7 @@ export function SimulationExportButtons({
       onClick={downloadCsv}
       className="h-8 rounded-md border border-line bg-white px-3 text-xs font-semibold text-ink transition hover:border-moss hover:text-moss"
     >
-      Download comparison CSV
+      {label}
     </button>
   );
 }

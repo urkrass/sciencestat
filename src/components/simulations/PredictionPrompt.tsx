@@ -1,25 +1,30 @@
 export type SamplingPrediction = "A" | "B" | "same" | null;
+export type ScenarioPrediction = SamplingPrediction;
 
 type PredictionPromptProps = {
-  value: SamplingPrediction;
-  onChange: (value: SamplingPrediction) => void;
+  value: ScenarioPrediction;
+  onChange: (value: ScenarioPrediction) => void;
+  question?: string;
 };
 
-const options: { value: Exclude<SamplingPrediction, null>; label: string }[] = [
+const options: { value: Exclude<ScenarioPrediction, null>; label: string }[] = [
   { value: "A", label: "Scenario A" },
   { value: "B", label: "Scenario B" },
   { value: "same", label: "About the same" }
 ];
 
-export function PredictionPrompt({ value, onChange }: PredictionPromptProps) {
+export function PredictionPrompt({
+  value,
+  onChange,
+  question = "Which scenario do you expect to produce a tighter distribution of sample means?"
+}: PredictionPromptProps) {
   return (
     <section className="border-t border-line pt-2">
       <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
         Step 1: Prediction
       </h3>
       <p className="mt-1 text-xs leading-4 text-slate-700">
-        Which scenario do you expect to produce a tighter distribution of sample
-        means?
+        {question}
       </p>
       <div className="mt-2 grid grid-cols-3 gap-1">
         {options.map((option) => {

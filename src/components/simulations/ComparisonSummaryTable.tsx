@@ -1,8 +1,21 @@
 import type { SamplingComparisonResult } from "@/lib/statistics/comparison";
 import { roundTo } from "@/lib/statistics/summary";
 
+export type ComparisonSummaryRow = {
+  label: string;
+  a: string;
+  b: string;
+};
+
+export type ComparisonSummaryItem = {
+  label: string;
+  value: string;
+};
+
 type ComparisonSummaryTableProps = {
-  comparison: SamplingComparisonResult;
+  comparison?: SamplingComparisonResult;
+  rows?: ComparisonSummaryRow[];
+  summaryItems?: ComparisonSummaryItem[];
 };
 
 function scenarioLabel(value: "A" | "B" | "same") {
@@ -13,8 +26,10 @@ function scenarioLabel(value: "A" | "B" | "same") {
   return `Scenario ${value}`;
 }
 
-export function ComparisonSummaryTable({ comparison }: ComparisonSummaryTableProps) {
-  const rows = [
+function buildSamplingRows(
+  comparison: SamplingComparisonResult
+): ComparisonSummaryRow[] {
+  return [
     {
       label: "sample size n",
       a: String(comparison.scenarioA.controls.sampleSize),
@@ -41,6 +56,31 @@ export function ComparisonSummaryTable({ comparison }: ComparisonSummaryTablePro
       b: String(comparison.scenarioB.controls.repeatedSamples)
     }
   ];
+}
+
+function buildSamplingSummary(
+  comparison: SamplingComparisonResult
+): ComparisonSummaryItem[] {
+  return [
+    {
+      label: "Difference in SD",
+      value: roundTo(comparison.sdDifference, 2)
+    },
+    {
+      label: "Tighter sample means",
+      value: scenarioLabel(comparison.tighterScenario)
+    }
+  ];
+}
+
+export function ComparisonSummaryTable({
+  comparison,
+  rows,
+  summaryItems
+}: ComparisonSummaryTableProps) {
+  const displayedRows = rows ?? (comparison ? buildSamplingRows(comparison) : []);
+  const displayedSummaryItems =
+    summaryItems ?? (comparison ? buildSamplingSummary(comparison) : []);
 
   return (
     <section>
@@ -63,7 +103,7 @@ export function ComparisonSummaryTable({ comparison }: ComparisonSummaryTablePro
             </tr>
           </thead>
           <tbody className="divide-y divide-line">
-            {rows.map((row) => (
+            {displayedRows.map((row) => (
               <tr key={row.label}>
                 <th scope="row" className="py-1 pr-2 font-medium text-slate-600">
                   {row.label}
@@ -75,24 +115,20 @@ export function ComparisonSummaryTable({ comparison }: ComparisonSummaryTablePro
           </tbody>
         </table>
       </div>
-      <dl className="mt-2 grid gap-1 border-t border-line pt-2 text-xs sm:grid-cols-2">
-        <div>
-          <dt className="font-semibold uppercase tracking-[0.08em] text-slate-500">
-            Difference in SD
-          </dt>
-          <dd className="mt-0.5 text-sm font-semibold text-ink">
-            {roundTo(comparison.sdDifference, 2)}
-          </dd>
-        </div>
-        <div>
-          <dt className="font-semibold uppercase tracking-[0.08em] text-slate-500">
-            Tighter sample means
-          </dt>
-          <dd className="mt-0.5 text-sm font-semibold text-ink">
-            {scenarioLabel(comparison.tighterScenario)}
-          </dd>
-        </div>
-      </dl>
+      {displayedSummaryItems.length > 0 ? (
+        <dl className="mt-2 grid gap-1 border-t border-line pt-2 text-xs sm:grid-cols-2">
+          {displayedSummaryItems.map((item) => (
+            <div key={item.label}>
+              <dt className="font-semibold uppercase tracking-[0.08em] text-slate-500">
+                {item.label}
+              </dt>
+              <dd className="mt-0.5 text-sm font-semibold text-ink">
+                {item.value}
+              </dd>
+            </div>
+          ))}
+        </dl>
+      ) : null}
     </section>
   );
 }
