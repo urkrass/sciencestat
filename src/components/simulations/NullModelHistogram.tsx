@@ -1,3 +1,8 @@
+"use client";
+
+import { bin as createBinGenerator } from "d3-array";
+import { scaleLinear } from "d3-scale";
+import { motion, useReducedMotion } from "motion/react";
 import type { TailMode } from "@/lib/statistics/inference";
 import { roundTo } from "@/lib/statistics/summary";
 
@@ -24,20 +29,15 @@ function svgNumber(value: number) {
 
 function buildBins(values: number[], min: number, max: number): HistogramBin[] {
   const binCount = Math.min(28, Math.max(14, Math.round(Math.sqrt(values.length))));
-  const binWidth = (max - min) / binCount;
-  const bins = Array.from({ length: binCount }, (_, index) => ({
-    start: min + index * binWidth,
-    end: min + (index + 1) * binWidth,
-    count: 0
+  const bins = createBinGenerator()
+    .domain([min, max])
+    .thresholds(binCount)(values);
+
+  return bins.map((bin) => ({
+    start: bin.x0 ?? min,
+    end: bin.x1 ?? max,
+    count: bin.length
   }));
-
-  values.forEach((value) => {
-    const rawIndex = Math.floor((value - min) / binWidth);
-    const index = Math.min(binCount - 1, Math.max(0, rawIndex));
-    bins[index].count += 1;
-  });
-
-  return bins;
 }
 
 export function NullModelHistogram({
@@ -50,6 +50,7 @@ export function NullModelHistogram({
   ariaLabel,
   title
 }: NullModelHistogramProps) {
+  const shouldReduceMotion = useReducedMotion();
   const observedDistance = Math.abs(observedMean - nullMean);
   const rawMin =
     tailMode === "twoSided"
@@ -76,10 +77,14 @@ export function NullModelHistogram({
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
 
-  const xScale = (value: number) =>
-    svgNumber(margin.left + ((value - min) / (max - min)) * innerWidth);
-  const yScale = (count: number) =>
-    svgNumber(margin.top + innerHeight - (count / maxCount) * innerHeight);
+  const xScaleRaw = scaleLinear()
+    .domain([min, max])
+    .range([margin.left, margin.left + innerWidth]);
+  const yScaleRaw = scaleLinear()
+    .domain([0, maxCount])
+    .range([margin.top + innerHeight, margin.top]);
+  const xScale = (value: number) => svgNumber(xScaleRaw(value));
+  const yScale = (count: number) => svgNumber(yScaleRaw(count));
 
   const nullX = xScale(nullMean);
   const observedX = xScale(observedMean);
@@ -114,16 +119,18 @@ export function NullModelHistogram({
     >
       <title>{title ?? `Null model simulation: ${tailLabel}`}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
-      <rect
-        key={`wash-${animationKey}`}
-        className="simulation-plot-wash"
-        x={margin.left}
-        y={margin.top}
-        width={innerWidth * 0.7}
-        height={innerHeight}
-        fill="#dfece6"
-        opacity="0.34"
-      />
+      {!shouldReduceMotion ? (
+        <motion.rect
+          key={`wash-${animationKey}`}
+          initial={{ x: margin.left - innerWidth * 0.55, opacity: 0.34 }}
+          animate={{ x: margin.left + innerWidth * 0.85, opacity: 0 }}
+          transition={{ duration: 0.78, ease: "easeOut" }}
+          y={margin.top}
+          width={innerWidth * 0.7}
+          height={innerHeight}
+          fill="#dfece6"
+        />
+      ) : null}
       <line
         x1={margin.left}
         x2={margin.left + innerWidth}
@@ -149,26 +156,35 @@ export function NullModelHistogram({
         const barHeight = margin.top + innerHeight - barY;
 
         return (
-          <rect
+          <motion.rect
             key={`${animationKey}-${bin.start}-${bin.end}`}
-            className={[
-              "simulation-histogram-bar",
-              isExtreme ? "simulation-tail-glow" : ""
-            ]
-              .filter(Boolean)
-              .join(" ")}
             x={barX + 1}
             y={barY}
             width={Math.max(1, nextX - barX - 2)}
             height={barHeight}
             fill={isExtreme ? "#b25b35" : "#367765"}
-            opacity={isExtreme ? "0.74" : "0.82"}
-            style={{ animationDelay: `${index * 16}ms` }}
+            initial={
+              shouldReduceMotion
+                ? false
+                : { opacity: 0, scaleY: 0.08 }
+            }
+            animate={{
+              opacity: isExtreme && !shouldReduceMotion ? [0, 0.94, 0.74] : isExtreme ? 0.74 : 0.82,
+              scaleY: 1
+            }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : isExtreme ? 0.68 : 0.52,
+              delay: shouldReduceMotion ? 0 : index * 0.016,
+              ease: [0.2, 0.85, 0.25, 1]
+            }}
+            style={{
+              transformBox: "fill-box",
+              transformOrigin: "center bottom"
+            }}
           />
         );
       })}
-      <line
-        className="simulation-reference-line"
+      <motion.line
         x1={nullX}
         x2={nullX}
         y1={margin.top - 2}
@@ -176,15 +192,24 @@ export function NullModelHistogram({
         stroke="#2f6f5f"
         strokeDasharray="5 5"
         strokeWidth="2"
+        initial={shouldReduceMotion ? false : { opacity: 0, pathLength: 0 }}
+        animate={{ opacity: 1, pathLength: 1 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.68, ease: "easeOut" }}
       />
-      <line
-        className="simulation-reference-line"
+      <motion.line
         x1={observedX}
         x2={observedX}
         y1={margin.top - 2}
         y2={margin.top + innerHeight}
         stroke="#9a5a32"
         strokeWidth="2"
+        initial={shouldReduceMotion ? false : { opacity: 0, pathLength: 0 }}
+        animate={{ opacity: 1, pathLength: 1 }}
+        transition={{
+          duration: shouldReduceMotion ? 0 : 0.68,
+          delay: shouldReduceMotion ? 0 : 0.08,
+          ease: "easeOut"
+        }}
       />
       <text
         x={nullX}

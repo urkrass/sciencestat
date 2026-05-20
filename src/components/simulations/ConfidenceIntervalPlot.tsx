@@ -1,3 +1,7 @@
+"use client";
+
+import { scaleLinear } from "d3-scale";
+import { motion, useReducedMotion } from "motion/react";
 import type { ConfidenceInterval } from "@/lib/statistics/inference";
 import { roundTo } from "@/lib/statistics/summary";
 
@@ -22,6 +26,7 @@ export function ConfidenceIntervalPlot({
   ariaLabel = "Simulated confidence intervals with a vertical line marking the true population mean",
   title = "Confidence interval coverage plot"
 }: ConfidenceIntervalPlotProps) {
+  const shouldReduceMotion = useReducedMotion();
   const visibleIntervals = intervals.slice(0, compact ? 60 : 80);
   const rawMin = Math.min(trueMean, ...visibleIntervals.map((interval) => interval.lower));
   const rawMax = Math.max(trueMean, ...visibleIntervals.map((interval) => interval.upper));
@@ -41,8 +46,10 @@ export function ConfidenceIntervalPlot({
   const innerHeight = height - margin.top - margin.bottom;
   const rowGap = innerHeight / Math.max(visibleIntervals.length - 1, 1);
 
-  const xScale = (value: number) =>
-    svgNumber(margin.left + ((value - min) / (max - min)) * innerWidth);
+  const xScaleRaw = scaleLinear()
+    .domain([min, max])
+    .range([margin.left, margin.left + innerWidth]);
+  const xScale = (value: number) => svgNumber(xScaleRaw(value));
   const trueMeanX = xScale(trueMean);
 
   return (
@@ -54,16 +61,18 @@ export function ConfidenceIntervalPlot({
     >
       <title>{title}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
-      <rect
-        key={`wash-${animationKey}`}
-        className="simulation-plot-wash"
-        x={margin.left}
-        y={margin.top}
-        width={innerWidth * 0.7}
-        height={innerHeight}
-        fill="#dfece6"
-        opacity="0.34"
-      />
+      {!shouldReduceMotion ? (
+        <motion.rect
+          key={`wash-${animationKey}`}
+          initial={{ x: margin.left - innerWidth * 0.55, opacity: 0.34 }}
+          animate={{ x: margin.left + innerWidth * 0.85, opacity: 0 }}
+          transition={{ duration: 0.78, ease: "easeOut" }}
+          y={margin.top}
+          width={innerWidth * 0.7}
+          height={innerHeight}
+          fill="#dfece6"
+        />
+      ) : null}
       <line
         x1={margin.left}
         x2={margin.left + innerWidth}
@@ -72,8 +81,7 @@ export function ConfidenceIntervalPlot({
         stroke="#8b98aa"
         strokeWidth="1"
       />
-      <line
-        className="simulation-reference-line"
+      <motion.line
         x1={trueMeanX}
         x2={trueMeanX}
         y1={margin.top - 4}
@@ -81,6 +89,9 @@ export function ConfidenceIntervalPlot({
         stroke="#9a5a32"
         strokeDasharray="5 5"
         strokeWidth="2"
+        initial={shouldReduceMotion ? false : { opacity: 0, pathLength: 0 }}
+        animate={{ opacity: 1, pathLength: 1 }}
+        transition={{ duration: shouldReduceMotion ? 0 : 0.68, ease: "easeOut" }}
       />
       <text
         x={trueMeanX}
@@ -97,15 +108,29 @@ export function ConfidenceIntervalPlot({
         const intervalColor = interval.capturesMean ? "#367765" : "#b25b35";
 
         return (
-          <g
+          <motion.g
             key={`${animationKey}-${index}-${interval.lower}-${interval.upper}`}
-            className={[
-              "simulation-ci-interval",
-              interval.capturesMean ? "" : "simulation-tail-glow"
-            ]
-              .filter(Boolean)
-              .join(" ")}
-            style={{ animationDelay: `${index * 8}ms` }}
+            initial={
+              shouldReduceMotion
+                ? false
+                : { opacity: 0, scaleX: 0.08 }
+            }
+            animate={{
+              opacity:
+                !interval.capturesMean && !shouldReduceMotion
+                  ? [0, 1, 0.86]
+                  : 0.86,
+              scaleX: 1
+            }}
+            transition={{
+              duration: shouldReduceMotion ? 0 : !interval.capturesMean ? 0.68 : 0.52,
+              delay: shouldReduceMotion ? 0 : index * 0.008,
+              ease: [0.2, 0.85, 0.25, 1]
+            }}
+            style={{
+              transformBox: "fill-box",
+              transformOrigin: "left center"
+            }}
           >
             <line
               x1={xScale(interval.lower)}
@@ -123,7 +148,7 @@ export function ConfidenceIntervalPlot({
               r="2.4"
               fill={intervalColor}
             />
-          </g>
+          </motion.g>
         );
       })}
       <text

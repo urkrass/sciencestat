@@ -1,3 +1,6 @@
+"use client";
+
+import { motion, useReducedMotion } from "motion/react";
 import { MathExpression } from "@/components/simulations/MathExpression";
 
 type MathResolutionStep = {
@@ -11,6 +14,8 @@ type MathResolutionProps = {
 };
 
 export function MathResolution({ animationKey, steps }: MathResolutionProps) {
+  const shouldReduceMotion = useReducedMotion();
+
   return (
     <div
       key={animationKey}
@@ -18,16 +23,26 @@ export function MathResolution({ animationKey, steps }: MathResolutionProps) {
       className="simulation-math-resolution mt-3 grid gap-1.5 text-xs text-slate-700"
     >
       {steps.map((step, index) => (
-        <div
+        <motion.div
           key={`${step.label}-${step.math}`}
-          className="simulation-math-step flex flex-wrap items-center gap-x-2 gap-y-1"
-          style={{ animationDelay: `${index * 95}ms` }}
+          className="flex flex-wrap items-center gap-x-2 gap-y-1"
+          initial={
+            shouldReduceMotion
+              ? false
+              : { opacity: 0, y: 4, filter: "blur(4px)" }
+          }
+          animate={{ opacity: 1, y: 0, filter: "blur(0)" }}
+          transition={{
+            duration: shouldReduceMotion ? 0 : 0.54,
+            delay: shouldReduceMotion ? 0 : index * 0.095,
+            ease: [0.2, 0.85, 0.25, 1]
+          }}
         >
           <span className="min-w-[4.25rem] text-[0.66rem] font-semibold uppercase tracking-[0.12em] text-moss">
             {step.label}
           </span>
           <MathExpression math={step.math} />
-        </div>
+        </motion.div>
       ))}
     </div>
   );
