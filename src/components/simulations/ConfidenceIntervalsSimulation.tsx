@@ -13,6 +13,7 @@ import {
   type SimulationMode
 } from "@/components/simulations/GuidedModeSwitch";
 import { MathExpression } from "@/components/simulations/MathExpression";
+import { MathResolution } from "@/components/simulations/MathResolution";
 import { MisconceptionCheck } from "@/components/simulations/MisconceptionCheck";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
@@ -49,7 +50,10 @@ import {
   type ConfidenceComparisonScenarioResult,
   type ConfidenceScenarioControls
 } from "@/lib/statistics/comparison";
-import type { ConfidenceLevel } from "@/lib/statistics/inference";
+import {
+  criticalValueForConfidenceLevel,
+  type ConfidenceLevel
+} from "@/lib/statistics/inference";
 import { roundTo } from "@/lib/statistics/summary";
 
 const confidenceLevels: ConfidenceLevel[] = [90, 95, 99];
@@ -535,6 +539,23 @@ export function ConfidenceIntervalsSimulation() {
     result.coveragePercent,
     1
   )}%, and average width is ${roundTo(result.averageFullIntervalWidth, 2)}.`;
+  const confidenceCriticalValue = criticalValueForConfidenceLevel(
+    result.controls.confidenceLevel
+  );
+  const confidenceMathSteps = [
+    {
+      label: "formula",
+      math: "ME = z^*\\frac{\\sigma}{\\sqrt{n}}"
+    },
+    {
+      label: "values",
+      math: `ME = ${confidenceCriticalValue}\\cdot\\frac{${roundTo(result.controls.populationSd, 2)}}{\\sqrt{${result.controls.sampleSize}}}`
+    },
+    {
+      label: "run",
+      math: `ME \\approx ${roundTo(result.averageMarginOfError, 2)}\\quad \\text{width} \\approx ${roundTo(result.averageFullIntervalWidth, 2)}`
+    }
+  ];
 
   if (mode === "guided") {
     const selectedPreset = getPreset(presetId);
@@ -973,6 +994,10 @@ export function ConfidenceIntervalsSimulation() {
                 />
               </FormulaStrip>
             </div>
+            <MathResolution
+              animationKey={animationKey}
+              steps={confidenceMathSteps}
+            />
             <div className="mt-2">
               <SimulationLegend
                 items={[

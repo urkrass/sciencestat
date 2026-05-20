@@ -91,6 +91,16 @@ export function Histogram({
     >
       <title>{title}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
+      <rect
+        key={`wash-${animationKey}`}
+        className="simulation-plot-wash"
+        x={margin.left}
+        y={margin.top}
+        width={innerWidth * 0.7}
+        height={innerHeight}
+        fill="#dfece6"
+        opacity="0.34"
+      />
       <line
         x1={margin.left}
         x2={margin.left + innerWidth}

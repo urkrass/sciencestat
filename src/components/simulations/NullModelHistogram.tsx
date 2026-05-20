@@ -114,6 +114,16 @@ export function NullModelHistogram({
     >
       <title>{title ?? `Null model simulation: ${tailLabel}`}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
+      <rect
+        key={`wash-${animationKey}`}
+        className="simulation-plot-wash"
+        x={margin.left}
+        y={margin.top}
+        width={innerWidth * 0.7}
+        height={innerHeight}
+        fill="#dfece6"
+        opacity="0.34"
+      />
       <line
         x1={margin.left}
         x2={margin.left + innerWidth}
@@ -141,7 +151,12 @@ export function NullModelHistogram({
         return (
           <rect
             key={`${animationKey}-${bin.start}-${bin.end}`}
-            className="simulation-histogram-bar"
+            className={[
+              "simulation-histogram-bar",
+              isExtreme ? "simulation-tail-glow" : ""
+            ]
+              .filter(Boolean)
+              .join(" ")}
             x={barX + 1}
             y={barY}
             width={Math.max(1, nextX - barX - 2)}

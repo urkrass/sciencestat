@@ -9,6 +9,7 @@ import {
 } from "@/components/simulations/GuidedModeSwitch";
 import { Histogram } from "@/components/simulations/Histogram";
 import { MathExpression } from "@/components/simulations/MathExpression";
+import { MathResolution } from "@/components/simulations/MathResolution";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
   PredictionPrompt,
@@ -419,6 +420,20 @@ export function SamplingDistributionSimulation() {
     result.expectedStandardError,
     2
   )}.`;
+  const samplingMathSteps = [
+    {
+      label: "formula",
+      math: "SE = \\frac{\\sigma}{\\sqrt{n}}"
+    },
+    {
+      label: "values",
+      math: `SE = \\frac{${roundTo(result.controls.populationSd, 2)}}{\\sqrt{${result.controls.sampleSize}}}`
+    },
+    {
+      label: "run",
+      math: `SE \\approx ${roundTo(result.expectedStandardError, 2)}\\quad s_{\\bar{x}} \\approx ${roundTo(result.sampleMeanSd, 2)}`
+    }
+  ];
 
   if (mode === "guided") {
     const conclusion = comparison
@@ -834,6 +849,10 @@ export function SamplingDistributionSimulation() {
                 <MathExpression math={"\\frac{\\sigma}{\\sqrt{n}}"} />
               </FormulaStrip>
             </div>
+            <MathResolution
+              animationKey={animationKey}
+              steps={samplingMathSteps}
+            />
             <WhatChangedCallout>{whatChanged}</WhatChangedCallout>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">

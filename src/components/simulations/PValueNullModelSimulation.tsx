@@ -12,6 +12,7 @@ import {
   type SimulationMode
 } from "@/components/simulations/GuidedModeSwitch";
 import { MathExpression } from "@/components/simulations/MathExpression";
+import { MathResolution } from "@/components/simulations/MathResolution";
 import { MisconceptionCheck } from "@/components/simulations/MisconceptionCheck";
 import { NullModelHistogram } from "@/components/simulations/NullModelHistogram";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
@@ -588,6 +589,23 @@ export function PValueNullModelSimulation() {
     result.pValue,
     3
   )} from ${result.extremeCount}/${result.controls.simulatedSamples} extreme simulations.`;
+  const pValueMathSteps = [
+    {
+      label: "rule",
+      math: getExtremeRule(
+        result.controls.tailMode,
+        result.controls.observedSampleMean
+      )
+    },
+    {
+      label: "count",
+      math: `p = \\frac{${result.extremeCount}}{${result.controls.simulatedSamples}}`
+    },
+    {
+      label: "run",
+      math: `p \\approx ${roundTo(result.pValue, 3)}`
+    }
+  ];
 
   if (mode === "guided") {
     const selectedPreset = getPreset(presetId);
@@ -1039,6 +1057,10 @@ export function PValueNullModelSimulation() {
                 />
               </FormulaStrip>
             </div>
+            <MathResolution
+              animationKey={animationKey}
+              steps={pValueMathSteps}
+            />
             <div className="mt-2">
               <SimulationLegend
                 items={[
@@ -1057,15 +1079,6 @@ export function PValueNullModelSimulation() {
                 ]}
               />
             </div>
-            <p className="mt-2 text-xs font-medium leading-5 text-slate-600">
-              Extreme rule:{" "}
-              <MathExpression
-                math={getExtremeRule(
-                  result.controls.tailMode,
-                  result.controls.observedSampleMean
-                )}
-              />
-            </p>
             <WhatChangedCallout>{whatChanged}</WhatChangedCallout>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
