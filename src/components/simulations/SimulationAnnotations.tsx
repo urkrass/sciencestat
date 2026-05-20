@@ -24,7 +24,7 @@ type SimulationLegendProps = {
 
 export function FormulaStrip({ children }: FormulaStripProps) {
   return (
-    <div className="border-l-2 border-moss pl-3 text-xs font-semibold text-slate-700">
+    <div className="border-l-2 border-moss pl-3 text-sm font-semibold leading-6 text-slate-700">
       {children}
     </div>
   );

@@ -311,6 +311,15 @@ a,
     transform-box: fill-box;
     transform-origin: left center;
   }
+
+  .simulation-math .katex {
+    font-size: 1.06em;
+  }
+
+  .simulation-math .katex-display {
+    margin: 0;
+    text-align: left;
+  }
 }
 
 @keyframes simulation-bar-rise {

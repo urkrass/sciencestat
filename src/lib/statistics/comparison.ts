@@ -127,7 +127,7 @@ export function makeSamplingComparisonConclusion(
     )} for Scenario A and ${roundTo(
       scenarioB.sampleMeanSd,
       2
-    )} for Scenario B, matching SE = sigma / sqrt(n).`;
+    )} for Scenario B, matching the standard error formula.`;
   }
 
   return `${tighterName} had the more tightly clustered sample means, with SDs of ${roundTo(

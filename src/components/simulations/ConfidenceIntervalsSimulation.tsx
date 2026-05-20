@@ -12,6 +12,7 @@ import {
   GuidedModeSwitch,
   type SimulationMode
 } from "@/components/simulations/GuidedModeSwitch";
+import { MathExpression } from "@/components/simulations/MathExpression";
 import { MisconceptionCheck } from "@/components/simulations/MisconceptionCheck";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
@@ -639,7 +640,11 @@ export function ConfidenceIntervalsSimulation() {
               </p>
               <div className="mt-2">
                 <FormulaStrip>
-                  CI = sample mean +/- critical value x sigma / sqrt(n)
+                  <MathExpression
+                    math={
+                      "\\text{CI} = \\bar{x} \\pm z^*\\frac{\\sigma}{\\sqrt{n}}"
+                    }
+                  />
                 </FormulaStrip>
               </div>
             </div>
@@ -961,7 +966,11 @@ export function ConfidenceIntervalsSimulation() {
             </p>
             <div className="mt-2">
               <FormulaStrip>
-                CI = sample mean +/- critical value x sigma / sqrt(n)
+                <MathExpression
+                  math={
+                    "\\text{CI} = \\bar{x} \\pm z^*\\frac{\\sigma}{\\sqrt{n}}"
+                  }
+                />
               </FormulaStrip>
             </div>
             <div className="mt-2">

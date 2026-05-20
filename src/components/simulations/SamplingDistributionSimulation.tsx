@@ -8,6 +8,7 @@ import {
   type SimulationMode
 } from "@/components/simulations/GuidedModeSwitch";
 import { Histogram } from "@/components/simulations/Histogram";
+import { MathExpression } from "@/components/simulations/MathExpression";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
   PredictionPrompt,
@@ -518,7 +519,10 @@ export function SamplingDistributionSimulation() {
                 both with deterministic seeds, then write a defensible comparison.
               </p>
               <div className="mt-2">
-                <FormulaStrip>Expected SE = sigma / sqrt(n)</FormulaStrip>
+                <FormulaStrip>
+                  Expected SE ={" "}
+                  <MathExpression math={"\\frac{\\sigma}{\\sqrt{n}}"} />
+                </FormulaStrip>
               </div>
             </div>
             <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
@@ -825,7 +829,10 @@ export function SamplingDistributionSimulation() {
               Repeated samples from a population with mean 50.
             </p>
             <div className="mt-2">
-              <FormulaStrip>Expected SE = sigma / sqrt(n)</FormulaStrip>
+              <FormulaStrip>
+                Expected SE ={" "}
+                <MathExpression math={"\\frac{\\sigma}{\\sqrt{n}}"} />
+              </FormulaStrip>
             </div>
             <WhatChangedCallout>{whatChanged}</WhatChangedCallout>
           </div>

@@ -11,6 +11,7 @@ import {
   GuidedModeSwitch,
   type SimulationMode
 } from "@/components/simulations/GuidedModeSwitch";
+import { MathExpression } from "@/components/simulations/MathExpression";
 import { MisconceptionCheck } from "@/components/simulations/MisconceptionCheck";
 import { NullModelHistogram } from "@/components/simulations/NullModelHistogram";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
@@ -82,14 +83,14 @@ function getExtremeRule(tailMode: TailMode, observedMean: number) {
   const observedText = roundTo(observedMean, 1);
 
   if (tailMode === "greater") {
-    return `Extreme rule: simulated mean >= observed sample mean (${observedText}).`;
+    return `\\bar{x}_{\\mathrm{sim}} \\ge ${observedText}`;
   }
 
   if (tailMode === "less") {
-    return `Extreme rule: simulated mean <= observed sample mean (${observedText}).`;
+    return `\\bar{x}_{\\mathrm{sim}} \\le ${observedText}`;
   }
 
-  return `Extreme rule: abs(simulated mean - 50) >= abs(${observedText} - 50).`;
+  return `|\\bar{x}_{\\mathrm{sim}} - 50| \\ge |${observedText} - 50|`;
 }
 
 function getPValueInterpretation(result: PValueComparisonScenarioResult) {
@@ -692,8 +693,11 @@ export function PValueNullModelSimulation() {
               </p>
               <div className="mt-2">
                 <FormulaStrip>
-                  p = proportion of null simulations at least as extreme as the
-                  observed statistic
+                  <MathExpression
+                    math={
+                      "p = \\frac{\\text{extreme}}{\\text{total}}"
+                    }
+                  />
                 </FormulaStrip>
               </div>
             </div>
@@ -1028,8 +1032,11 @@ export function PValueNullModelSimulation() {
             </p>
             <div className="mt-2">
               <FormulaStrip>
-                p = proportion of null simulations at least as extreme as the
-                observed statistic
+                <MathExpression
+                  math={
+                    "p = \\frac{\\text{extreme}}{\\text{total}}"
+                  }
+                />
               </FormulaStrip>
             </div>
             <div className="mt-2">
@@ -1051,10 +1058,13 @@ export function PValueNullModelSimulation() {
               />
             </div>
             <p className="mt-2 text-xs font-medium leading-5 text-slate-600">
-              {getExtremeRule(
-                result.controls.tailMode,
-                result.controls.observedSampleMean
-              )}
+              Extreme rule:{" "}
+              <MathExpression
+                math={getExtremeRule(
+                  result.controls.tailMode,
+                  result.controls.observedSampleMean
+                )}
+              />
             </p>
             <WhatChangedCallout>{whatChanged}</WhatChangedCallout>
           </div>
