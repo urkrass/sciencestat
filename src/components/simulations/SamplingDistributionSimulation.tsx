@@ -4,6 +4,11 @@ import { useEffect, useRef, useState } from "react";
 import { Histogram } from "@/components/simulations/Histogram";
 import { NumberSlider } from "@/components/simulations/NumberSlider";
 import {
+  DirtySimulationNotice,
+  FormulaStrip,
+  TryThisPrompt
+} from "@/components/simulations/SimulationAnnotations";
+import {
   generateSampleMeans,
   type PopulationDistribution
 } from "@/lib/statistics/sampling";
@@ -72,6 +77,16 @@ function getInterpretation(sampleSize: number) {
   return "With a larger sample size, sample means cluster more tightly around the true population mean. The expected standard error becomes smaller.";
 }
 
+function controlsMatchResult(controls: SimulationControls, result: SimulationResult) {
+  return (
+    controls.distribution === result.controls.distribution &&
+    controls.sampleSize === result.controls.sampleSize &&
+    controls.repeatedSamples === result.controls.repeatedSamples &&
+    controls.populationSd === result.controls.populationSd &&
+    controls.seed === result.controls.seed
+  );
+}
+
 export function SamplingDistributionSimulation() {
   const [controls, setControls] = useState<SimulationControls>(defaultControls);
   const [result, setResult] = useState(() => createSimulationResult(defaultControls));
@@ -133,6 +148,8 @@ export function SamplingDistributionSimulation() {
     updateControls("seed", Math.floor(Math.random() * 999999) + 1);
   };
 
+  const isDirty = !controlsMatchResult(controls, result);
+
   const summaryItems = [
     {
       label: "Mean of sample means",
@@ -147,7 +164,7 @@ export function SamplingDistributionSimulation() {
       value: roundTo(result.expectedStandardError, 2)
     },
     {
-      label: "Repeated samples",
+      label: "Repeated samples / simulated means",
       value: String(result.controls.repeatedSamples)
     }
   ];
@@ -162,6 +179,30 @@ export function SamplingDistributionSimulation() {
           Controls
         </h2>
         <div className="mt-4 space-y-4">
+          <TryThisPrompt>
+            increase n from 10 to 80 and run again. Compare the SD of sample means
+            with the expected standard error.
+          </TryThisPrompt>
+
+          <div className="grid grid-cols-[1fr_7.75rem] gap-2">
+            <button
+              type="button"
+              aria-label="Run simulation"
+              disabled={isRunning}
+              onClick={runSimulation}
+              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
+            >
+              {isRunning ? "Running" : "Run"}
+            </button>
+            <button
+              type="button"
+              onClick={resetSimulation}
+              className="h-10 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
+            >
+              Reset defaults
+            </button>
+          </div>
+
           <fieldset>
             <legend className="text-sm font-semibold text-ink">
               Population distribution
@@ -245,24 +286,6 @@ export function SamplingDistributionSimulation() {
             </div>
           </div>
 
-          <div className="grid grid-cols-[1fr_5.5rem] gap-2 pt-1">
-            <button
-              type="button"
-              aria-label="Run simulation"
-              disabled={isRunning}
-              onClick={runSimulation}
-              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-            >
-              {isRunning ? "Running" : "Run"}
-            </button>
-            <button
-              type="button"
-              onClick={resetSimulation}
-              className="h-10 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
-            >
-              Reset
-            </button>
-          </div>
         </div>
       </section>
 
@@ -275,6 +298,14 @@ export function SamplingDistributionSimulation() {
             <p className="mt-1 text-sm leading-6 text-slate-600">
               Repeated samples from a population with mean 50.
             </p>
+            <div className="mt-2">
+              <FormulaStrip>
+                Expected SE = σ / √n
+              </FormulaStrip>
+            </div>
+            <div className="mt-2">
+              <DirtySimulationNotice isDirty={isDirty} />
+            </div>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
             Mean = 50
@@ -329,6 +360,11 @@ export function SamplingDistributionSimulation() {
           <p className="mt-3 text-sm leading-6 text-slate-700">
             The population mean is fixed at 50. The histogram shows how the sample
             mean changes when the same sampling process is repeated many times.
+          </p>
+          <p className="mt-3 text-sm leading-6 text-slate-700">
+            Each repeated sample contributes one sample mean to the histogram.
+            Compare "SD of sample means" with "Expected standard error"; they should
+            become close when many repeated samples are generated.
           </p>
         </section>
       </aside>

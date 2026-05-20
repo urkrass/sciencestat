@@ -12,7 +12,7 @@ export function ConfidenceIntervalPlot({
   trueMean,
   animationKey
 }: ConfidenceIntervalPlotProps) {
-  const visibleIntervals = intervals.slice(0, 90);
+  const visibleIntervals = intervals.slice(0, 80);
   const rawMin = Math.min(trueMean, ...visibleIntervals.map((interval) => interval.lower));
   const rawMax = Math.max(trueMean, ...visibleIntervals.map((interval) => interval.upper));
   const rawRange = rawMax - rawMin || 1;
@@ -22,9 +22,9 @@ export function ConfidenceIntervalPlot({
   const width = 760;
   const height = 410;
   const margin = {
-    top: 34,
+    top: 40,
     right: 28,
-    bottom: 62,
+    bottom: 58,
     left: 64
   };
   const innerWidth = width - margin.left - margin.right;

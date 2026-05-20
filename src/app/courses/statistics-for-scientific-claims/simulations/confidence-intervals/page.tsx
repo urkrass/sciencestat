@@ -19,28 +19,23 @@ export default function ConfidenceIntervalsPage() {
             className="inline-flex items-center gap-1.5 hover:text-moss"
           >
             <ArrowLeft aria-hidden="true" className="h-4 w-4" />
-            Simulations
+            Back to simulations
           </Link>
-          <span aria-hidden="true" className="text-line">
-            /
-          </span>
           <Link
             href="/courses/statistics-for-scientific-claims"
-            className="hover:text-moss"
+            className="text-slate-400 hover:text-moss"
           >
             Course
           </Link>
         </div>
-        <div className="mt-2 flex flex-col gap-2 lg:flex-row lg:items-end lg:justify-between">
-          <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-              Statistical simulation
-            </p>
-            <h1 className="heading-serif mt-1 text-2xl font-semibold leading-tight text-ink sm:text-3xl">
-              Confidence intervals
-            </h1>
-          </div>
-          <p className="max-w-xl text-sm leading-6 text-slate-600 lg:text-right">
+        <div className="mt-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
+            Statistical simulation
+          </p>
+          <h1 className="heading-serif mt-1 text-2xl font-semibold leading-tight text-ink sm:text-3xl">
+            Confidence intervals
+          </h1>
+          <p className="mt-1 max-w-2xl text-sm leading-6 text-slate-600">
             See how repeated confidence intervals behave around the true mean.
           </p>
         </div>

@@ -72,6 +72,9 @@ export function Histogram({
     margin.top + innerHeight - (count / maxCount) * innerHeight;
 
   const referenceX = xScale(referenceValue);
+  const yTicks = Array.from({ length: 4 }, (_, index) =>
+    Math.round((maxCount / 3) * index)
+  );
 
   return (
     <svg
@@ -98,6 +101,31 @@ export function Histogram({
         stroke="#8b98aa"
         strokeWidth="1"
       />
+      {yTicks.slice(1).map((tick) => {
+        const tickY = yScale(tick);
+
+        return (
+          <g key={tick}>
+            <line
+              x1={margin.left}
+              x2={margin.left + innerWidth}
+              y1={tickY}
+              y2={tickY}
+              stroke="#d9dee7"
+              strokeWidth="1"
+            />
+            <text
+              x={margin.left - 9}
+              y={tickY + 4}
+              textAnchor="end"
+              fill="#4b5870"
+              fontSize="12"
+            >
+              {tick}
+            </text>
+          </g>
+        );
+      })}
       {bins.map((bin, index) => {
         const barX = xScale(bin.start);
         const nextX = xScale(bin.end);
@@ -194,15 +222,6 @@ export function Histogram({
         fontSize="12"
       >
         0
-      </text>
-      <text
-        x={margin.left - 9}
-        y={margin.top + 4}
-        textAnchor="end"
-        fill="#4b5870"
-        fontSize="12"
-      >
-        {maxCount}
       </text>
     </svg>
   );
