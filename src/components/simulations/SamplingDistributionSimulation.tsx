@@ -412,7 +412,7 @@ export function SamplingDistributionSimulation() {
     return (
       <div
         aria-busy={isComparisonRunning}
-        className="grid h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[17rem_minmax(0,1fr)_20rem] lg:overflow-hidden"
+        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_20rem] lg:overflow-hidden"
       >
         <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
           <div className="flex items-center justify-between gap-2">
@@ -659,7 +659,7 @@ export function SamplingDistributionSimulation() {
   return (
     <div
       aria-busy={isRunning}
-      className="grid h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[17rem_minmax(0,1fr)_18rem] lg:overflow-hidden"
+      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_18rem] lg:overflow-hidden"
     >
       <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
         <div className="flex items-center justify-between gap-2">
