@@ -6,6 +6,9 @@ type HistogramProps = {
   xLabel: string;
   yLabel: string;
   animationKey?: number;
+  compact?: boolean;
+  ariaLabel?: string;
+  title?: string;
 };
 
 type HistogramBin = {
@@ -37,7 +40,10 @@ export function Histogram({
   referenceValue,
   xLabel,
   yLabel,
-  animationKey = 0
+  animationKey = 0,
+  compact = false,
+  ariaLabel = "Histogram of simulated sample means with a reference line at the true population mean",
+  title = "Histogram of sample means"
 }: HistogramProps) {
   if (values.length === 0) {
     return (
@@ -55,13 +61,13 @@ export function Histogram({
   const bins = buildBins(values, min, max);
   const maxCount = Math.max(...bins.map((bin) => bin.count), 1);
 
-  const width = 760;
-  const height = 410;
+  const width = compact ? 680 : 760;
+  const height = compact ? 330 : 410;
   const margin = {
-    top: 34,
-    right: 28,
-    bottom: 62,
-    left: 64
+    top: compact ? 30 : 34,
+    right: compact ? 24 : 28,
+    bottom: compact ? 52 : 62,
+    left: compact ? 58 : 64
   };
   const innerWidth = width - margin.left - margin.right;
   const innerHeight = height - margin.top - margin.bottom;
@@ -79,11 +85,11 @@ export function Histogram({
   return (
     <svg
       role="img"
-      aria-label="Histogram of simulated sample means with a reference line at the true population mean"
+      aria-label={ariaLabel}
       viewBox={`0 0 ${width} ${height}`}
       className="h-auto w-full overflow-visible"
     >
-      <title>Histogram of sample means</title>
+      <title>{title}</title>
       <rect width={width} height={height} rx="8" fill="#f9faf6" />
       <line
         x1={margin.left}
@@ -119,7 +125,7 @@ export function Histogram({
               y={tickY + 4}
               textAnchor="end"
               fill="#4b5870"
-              fontSize="12"
+              fontSize={compact ? "11" : "12"}
             >
               {tick}
             </text>
@@ -161,7 +167,7 @@ export function Histogram({
         y={margin.top - 7}
         textAnchor="middle"
         fill="#9a5a32"
-        fontSize="13"
+        fontSize={compact ? "11" : "13"}
         fontWeight="600"
       >
         true mean 50
@@ -171,7 +177,7 @@ export function Histogram({
         y={margin.top + innerHeight + 28}
         textAnchor="middle"
         fill="#4b5870"
-        fontSize="12"
+        fontSize={compact ? "11" : "12"}
       >
         {roundTo(min, 1)}
       </text>
@@ -180,7 +186,7 @@ export function Histogram({
         y={margin.top + innerHeight + 28}
         textAnchor="middle"
         fill="#4b5870"
-        fontSize="12"
+        fontSize={compact ? "11" : "12"}
       >
         50
       </text>
@@ -189,7 +195,7 @@ export function Histogram({
         y={margin.top + innerHeight + 28}
         textAnchor="middle"
         fill="#4b5870"
-        fontSize="12"
+        fontSize={compact ? "11" : "12"}
       >
         {roundTo(max, 1)}
       </text>
@@ -198,7 +204,7 @@ export function Histogram({
         y={height - 13}
         textAnchor="middle"
         fill="#172033"
-        fontSize="13"
+        fontSize={compact ? "12" : "13"}
         fontWeight="600"
       >
         {xLabel}
@@ -209,7 +215,7 @@ export function Histogram({
         textAnchor="middle"
         transform={`rotate(-90 22 ${margin.top + innerHeight / 2})`}
         fill="#172033"
-        fontSize="13"
+        fontSize={compact ? "12" : "13"}
         fontWeight="600"
       >
         {yLabel}
@@ -219,7 +225,7 @@ export function Histogram({
         y={margin.top + innerHeight + 4}
         textAnchor="end"
         fill="#4b5870"
-        fontSize="12"
+        fontSize={compact ? "11" : "12"}
       >
         0
       </text>
