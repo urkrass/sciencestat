@@ -27,6 +27,14 @@ npm run typecheck
 npm run build
 ```
 
+## Design Policy
+
+- Use one structural frame per workspace. Inside that frame, separate content with columns, spacing, headings, alignment, and light dividers before adding new boxes.
+- Avoid nested framed surfaces: no cards inside cards, panels inside panels, or repeated bordered explanatory boxes inside a simulation, reader, or practice workspace.
+- Buttons, inputs, segmented controls, tables, and native disclosure controls may keep clear affordance styling, but supporting text should not become another card.
+- Simulations should feel like a lab bench: controls, model output, and observations live in one coherent workspace rather than several stacked mini-panels.
+- Preserve the zero-scroll working-window intent for interactive surfaces. If content is dense, compress or reorganize it before adding another framed section.
+
 ## Deploy To Vercel
 
 If the project is connected to Vercel through Git, push the branch and Vercel will create a preview deployment.

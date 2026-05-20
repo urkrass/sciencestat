@@ -150,7 +150,7 @@ function ScenarioEditor({
   onChange
 }: ScenarioEditorProps) {
   return (
-    <details className="rounded-md border border-line bg-white/85 p-2 text-xs text-slate-700">
+    <details className="border-t border-line pt-2 text-xs text-slate-700">
       <summary className="cursor-pointer font-semibold text-ink">
         {label} settings
       </summary>
@@ -446,7 +446,7 @@ export function SamplingDistributionSimulation() {
 
             <PredictionPrompt value={prediction} onChange={setPrediction} />
 
-            <section className="rounded-md border border-line bg-white/85 p-2">
+            <section className="border-t border-line pt-2">
               <div className="flex items-center justify-between gap-2">
                 <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
                   Step 2: Run
@@ -464,7 +464,7 @@ export function SamplingDistributionSimulation() {
               {comparisonNotice ? (
                 <p
                   role="status"
-                  className="mt-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-1.5 text-xs font-medium text-amber-900"
+                  className="mt-2 border-l-2 border-amber-500 pl-3 text-xs font-medium text-amber-900"
                 >
                   {comparisonNotice}
                 </p>
@@ -505,7 +505,7 @@ export function SamplingDistributionSimulation() {
               <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
                 Side-by-side sample means
               </h2>
-              <p className="mt-1 rounded-md border border-line bg-white/80 px-3 py-1.5 text-xs leading-4 text-slate-700">
+              <p className="mt-1 max-w-2xl text-xs leading-4 text-slate-700">
                 Predict which scenario will produce more stable sample means, run
                 both with deterministic seeds, then write a defensible comparison.
               </p>
@@ -518,7 +518,7 @@ export function SamplingDistributionSimulation() {
             </span>
           </div>
 
-          <div className="mt-3 grid min-h-0 flex-1 gap-3 lg:grid-cols-2">
+          <div className="mt-3 grid min-h-0 flex-1 gap-3 lg:grid-cols-2 lg:divide-x lg:divide-line">
             {comparison ? (
               [
                 { label: "Scenario A", result: comparison.scenarioA },
@@ -526,7 +526,7 @@ export function SamplingDistributionSimulation() {
               ].map(({ label, result }) => (
                 <article
                   key={`${comparisonAnimationKey}-${label}`}
-                  className="flex min-h-0 flex-col rounded-md border border-line bg-[#f9faf6] p-2"
+                  className="flex min-h-0 flex-col bg-[#f9faf6] p-2 lg:pl-3 lg:first:pl-0"
                 >
                   <div className="flex items-start justify-between gap-2">
                     <div>
@@ -575,7 +575,7 @@ export function SamplingDistributionSimulation() {
                 ].map(({ label, controls }) => (
                   <article
                     key={label}
-                    className="rounded-md border border-line bg-[#f9faf6] p-3"
+                    className="bg-[#f9faf6] p-3"
                   >
                     <h3 className="text-xs font-semibold uppercase tracking-[0.1em] text-moss">
                       {label}
@@ -608,7 +608,7 @@ export function SamplingDistributionSimulation() {
                     </dl>
                   </article>
                 ))}
-                <p className="rounded-md border border-line bg-white/80 p-3 text-xs leading-5 text-slate-600 lg:col-span-2">
+                <p className="border-t border-line pt-3 text-xs leading-5 text-slate-600 lg:col-span-2">
                   Run the comparison to generate both sampling distributions and
                   compare the simulated SD of sample means with the expected
                   standard error.
@@ -622,7 +622,7 @@ export function SamplingDistributionSimulation() {
           {comparison ? (
             <div className="space-y-2">
               {prediction ? (
-                <p className="rounded-md border border-line bg-paper px-3 py-2 text-xs leading-5 text-slate-700">
+                <p className="border-l-2 border-line pl-3 text-xs leading-5 text-slate-700">
                   Prediction:{" "}
                   <span className="font-semibold text-ink">
                     {prediction === "same"
@@ -640,7 +640,7 @@ export function SamplingDistributionSimulation() {
               {conclusion ? <GeneratedConclusion conclusion={conclusion} /> : null}
             </div>
           ) : (
-            <section className="rounded-md border border-line bg-white p-3">
+            <section>
               <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
                 Observation panel
               </h2>

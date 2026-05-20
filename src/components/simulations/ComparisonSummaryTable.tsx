@@ -43,7 +43,7 @@ export function ComparisonSummaryTable({ comparison }: ComparisonSummaryTablePro
   ];
 
   return (
-    <section className="rounded-md border border-line bg-white p-2">
+    <section>
       <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
         Step 3: Observe
       </h3>
