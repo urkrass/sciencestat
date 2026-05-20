@@ -30,14 +30,14 @@ export function NumberSlider({
   };
 
   return (
-    <div className="space-y-1.5">
+    <div className="space-y-1">
       <div className="flex items-baseline justify-between gap-3">
-        <label htmlFor={id} className="text-sm font-semibold text-ink">
+        <label htmlFor={id} className="text-xs font-semibold text-ink sm:text-sm">
           {label}
         </label>
-        <span className="text-sm font-medium text-moss">{value}</span>
+        <span className="text-xs font-medium text-moss sm:text-sm">{value}</span>
       </div>
-      <div className="grid grid-cols-[1fr_4.75rem] items-center gap-3">
+      <div className="grid grid-cols-[1fr_4.75rem] items-center gap-2">
         <input
           id={id}
           type="range"
@@ -56,7 +56,7 @@ export function NumberSlider({
           step={step}
           value={value}
           onChange={(event) => handleChange(Number(event.target.value))}
-          className="h-8 rounded-md border border-line bg-white/90 px-2 text-sm text-ink focus:border-moss focus:outline-none"
+          className="h-7 rounded-md border border-line bg-white/90 px-2 text-sm text-ink focus:border-moss focus:outline-none"
         />
       </div>
       {helpText ? <p className="text-xs leading-5 text-slate-500">{helpText}</p> : null}

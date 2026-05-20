@@ -186,42 +186,42 @@ export function ConfidenceIntervalsSimulation() {
   return (
     <div
       aria-busy={isRunning}
-      className="grid h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[18rem_minmax(0,1fr)_19rem] lg:overflow-hidden"
+      className="grid h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid-cols-[17rem_minmax(0,1fr)_18rem] lg:overflow-hidden"
     >
-      <section className="min-h-0 border-b border-line bg-paper/70 p-4 lg:border-b-0 lg:border-r lg:overflow-hidden">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+      <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
           Controls
         </h2>
-        <div className="mt-4 space-y-4">
+        <div className="mt-2.5 space-y-2.5">
           <TryThisPrompt>
             switch from 90% to 99% and run again. Watch what happens to coverage
             and interval width.
           </TryThisPrompt>
 
-          <div className="grid grid-cols-[1fr_7.75rem] gap-2">
+          <div className="grid grid-cols-[1fr_7.25rem] gap-2">
             <button
               type="button"
               aria-label="Run simulation"
               disabled={isRunning}
               onClick={runSimulation}
-              className="h-10 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
+              className="h-9 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
             >
               {isRunning ? "Running" : "Run"}
             </button>
             <button
               type="button"
               onClick={resetSimulation}
-              className="h-10 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
+              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
             >
               Reset defaults
             </button>
           </div>
 
           <fieldset>
-            <legend className="text-sm font-semibold text-ink">
+            <legend className="text-xs font-semibold text-ink sm:text-sm">
               Confidence level
             </legend>
-            <div className="mt-2 grid grid-cols-3 gap-1 rounded-md border border-line bg-white p-1">
+            <div className="mt-1.5 grid grid-cols-3 gap-1 rounded-md border border-line bg-white p-1">
               {confidenceLevels.map((level) => {
                 const isSelected = controls.confidenceLevel === level;
 
@@ -232,7 +232,7 @@ export function ConfidenceIntervalsSimulation() {
                     aria-pressed={isSelected}
                     onClick={() => updateControls("confidenceLevel", level)}
                     className={[
-                      "h-8 rounded-[5px] px-2 text-sm font-medium transition",
+                      "h-7 rounded-[5px] px-2 text-xs font-medium transition sm:text-sm",
                       isSelected
                         ? "bg-moss text-white shadow-sm"
                         : "text-ink hover:bg-paper hover:text-moss"
@@ -271,8 +271,8 @@ export function ConfidenceIntervalsSimulation() {
             onChange={(value) => updateControls("populationSd", value)}
           />
 
-          <div className="space-y-2">
-            <label htmlFor="ci-seed" className="text-sm font-semibold text-ink">
+          <div className="space-y-1">
+            <label htmlFor="ci-seed" className="text-xs font-semibold text-ink sm:text-sm">
               Seed
             </label>
             <div className="grid grid-cols-[1fr_4.25rem] gap-2">
@@ -287,13 +287,13 @@ export function ConfidenceIntervalsSimulation() {
                     updateControls("seed", Math.max(1, Math.trunc(nextSeed)));
                   }
                 }}
-                className="h-8 rounded-md border border-line bg-white/90 px-2 text-sm text-ink focus:border-moss focus:outline-none"
+                className="h-7 rounded-md border border-line bg-white/90 px-2 text-sm text-ink focus:border-moss focus:outline-none"
               />
               <button
                 type="button"
                 aria-label="New seed"
                 onClick={generateNewSeed}
-                className="h-8 rounded-md border border-line bg-white px-3 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
+                className="h-7 rounded-md border border-line bg-white px-3 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
               >
                 New
               </button>
@@ -303,13 +303,13 @@ export function ConfidenceIntervalsSimulation() {
         </div>
       </section>
 
-      <section className="flex min-h-[26rem] flex-col p-4 lg:min-h-0">
+      <section className="flex min-h-[26rem] flex-col p-2.5 lg:min-h-0">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
-            <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+            <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
               Interval coverage
             </h2>
-            <p className="mt-1 text-sm leading-6 text-slate-600">
+            <p className="mt-1 text-sm leading-5 text-slate-600">
               Each line is one simulated confidence interval for the mean.
             </p>
             <div className="mt-2">
@@ -330,7 +330,7 @@ export function ConfidenceIntervalsSimulation() {
                 ]}
               />
             </div>
-            <p className="mt-2 text-xs leading-5 text-slate-500">
+            <p className="mt-2 text-xs leading-4 text-slate-500">
               {intervalDisplayNote} Currently displaying {displayedIntervalCount}.
             </p>
             <div className="mt-2">
@@ -358,34 +358,34 @@ export function ConfidenceIntervalsSimulation() {
         </div>
       </section>
 
-      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-4 lg:border-l lg:border-t-0 lg:overflow-hidden">
-        <h2 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+        <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
           Results
         </h2>
-        <dl className="mt-4 divide-y divide-line border-y border-line">
+        <dl className="mt-3 divide-y divide-line border-y border-line">
           {summaryItems.map((item) => (
             <div
               key={`${animationKey}-${item.label}`}
-              className="flex items-center justify-between gap-3 py-3"
+              className="flex items-center justify-between gap-3 py-2"
             >
               <dt className="text-[0.68rem] font-semibold uppercase tracking-[0.1em] text-slate-500">
                 {item.label}
               </dt>
-              <dd className="simulation-result-value text-xl font-semibold text-ink">
+              <dd className="simulation-result-value text-lg font-semibold text-ink">
                 {item.value}
               </dd>
             </div>
           ))}
         </dl>
 
-        <section className="mt-5">
-          <h3 className="text-sm font-semibold uppercase tracking-[0.14em] text-moss">
+        <section className="mt-4">
+          <h3 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
             Interpretation
           </h3>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
+          <p className="mt-2 text-sm leading-5 text-slate-700">
             {getCoverageInterpretation(result)}
           </p>
-          <p className="mt-3 text-sm leading-6 text-slate-700">
+          <p className="mt-2 text-sm leading-5 text-slate-700">
             A {result.controls.confidenceLevel}% method should capture the true mean
             about {result.controls.confidenceLevel}% of the time over many repeated
             samples.
