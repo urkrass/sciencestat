@@ -20,10 +20,17 @@ import {
 } from "@/components/simulations/PredictionPrompt";
 import { SimulationAssumptionsPanel } from "@/components/simulations/SimulationAssumptionsPanel";
 import {
+  AdvancedSettings,
+  ExperimentActionButton,
+  RunExperimentButton,
+  SimulationActivityPanel,
+  StepperControl,
+  WhatChangedCallout
+} from "@/components/simulations/SimulationActivity";
+import {
   DirtySimulationNotice,
   FormulaStrip,
-  SimulationLegend,
-  TryThisPrompt
+  SimulationLegend
 } from "@/components/simulations/SimulationAnnotations";
 import { SimulationReflectionPanel } from "@/components/simulations/SimulationReflectionPanel";
 import {
@@ -75,14 +82,14 @@ function getExtremeRule(tailMode: TailMode, observedMean: number) {
   const observedText = roundTo(observedMean, 1);
 
   if (tailMode === "greater") {
-    return `Extreme rule: simulated mean ≥ observed sample mean (${observedText}).`;
+    return `Extreme rule: simulated mean >= observed sample mean (${observedText}).`;
   }
 
   if (tailMode === "less") {
-    return `Extreme rule: simulated mean ≤ observed sample mean (${observedText}).`;
+    return `Extreme rule: simulated mean <= observed sample mean (${observedText}).`;
   }
 
-  return `Extreme rule: |simulated mean − 50| ≥ |${observedText} − 50|.`;
+  return `Extreme rule: abs(simulated mean - 50) >= abs(${observedText} - 50).`;
 }
 
 function getPValueInterpretation(result: PValueComparisonScenarioResult) {
@@ -494,6 +501,13 @@ export function PValueNullModelSimulation() {
     updateControls("seed", Math.floor(Math.random() * 999999) + 1);
   };
 
+  const applyExperiment = (changes: Partial<PValueScenarioControls>) => {
+    setControls((current) => ({
+      ...current,
+      ...changes
+    }));
+  };
+
   const updateScenario = <Key extends keyof PValueScenarioControls>(
     scenario: "A" | "B",
     key: Key,
@@ -543,7 +557,7 @@ export function PValueNullModelSimulation() {
     comparison !== null &&
     !pValueComparisonMatchesControls(scenarioA, scenarioB, comparison);
   const comparisonNotice = presetChangedPending
-    ? "Preset changed — run comparison to update."
+    ? "Preset changed - run comparison to update."
     : comparisonIsDirty
       ? "Settings changed - run comparison to update."
       : null;
@@ -566,6 +580,13 @@ export function PValueNullModelSimulation() {
       value: roundTo(result.nullDistributionSd, 2)
     }
   ];
+  const whatChanged = `Observed mean ${roundTo(
+    result.controls.observedSampleMean,
+    1
+  )} is ${roundTo(result.distanceFromNullMean, 1)} from the null mean. The simulated p-value is ${roundTo(
+    result.pValue,
+    3
+  )} from ${result.extremeCount}/${result.controls.simulatedSamples} extreme simulations.`;
 
   if (mode === "guided") {
     const selectedPreset = getPreset(presetId);
@@ -579,17 +600,12 @@ export function PValueNullModelSimulation() {
     return (
       <div
         aria-busy={isComparisonRunning}
-        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_20rem] lg:overflow-hidden"
+        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_15rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_20rem]"
       >
-        <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-              Controls
-            </h2>
-            <GuidedModeSwitch mode={mode} onChange={setMode} compact />
-          </div>
-
-          <div className="mt-2 space-y-2">
+        <SimulationActivityPanel
+          prompt="Predict which observed mean will look rarer under the null model, then run both scenarios."
+          modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
+        >
             <div className="space-y-1">
               <label
                 htmlFor="pvalue-comparison-preset"
@@ -619,19 +635,14 @@ export function PValueNullModelSimulation() {
               question="Which scenario do you expect to have the smaller p-value?"
             />
 
-            <section className="border-t border-line pt-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
-                Step 2: Run
-              </h3>
-              <button
-                type="button"
-                aria-label="Run p-value comparison"
-                disabled={isComparisonRunning}
+            <section className="border-t border-line pt-3">
+              <RunExperimentButton
+                isRunning={isComparisonRunning}
                 onClick={runComparison}
-                className="mt-1.5 h-8 w-full rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-              >
-                {isComparisonRunning ? "Running" : "Run comparison"}
-              </button>
+                label="Run comparison"
+                runningLabel="Running"
+                ariaLabel="Run p-value comparison"
+              />
               {comparisonNotice ? (
                 <p
                   role="status"
@@ -667,10 +678,9 @@ export function PValueNullModelSimulation() {
               ]}
               note="Simulated p-values have resolution. With 1000 simulations, one counted simulation changes p by 0.001."
             />
-          </div>
-        </section>
+        </SimulationActivityPanel>
 
-        <section className="flex min-h-[26rem] flex-col p-2.5 lg:min-h-0">
+        <section className="flex min-h-[26rem] flex-col p-2.5 min-[960px]:min-h-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
@@ -790,7 +800,7 @@ export function PValueNullModelSimulation() {
           </div>
         </section>
 
-        <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+        <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 min-[960px]:border-l min-[960px]:border-t-0 min-[960px]:overflow-y-auto">
           <div className="space-y-2">
             {comparison ? (
               <>
@@ -848,42 +858,72 @@ export function PValueNullModelSimulation() {
   return (
     <div
       aria-busy={isRunning}
-      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_18rem] lg:overflow-hidden"
+      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_13rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_18rem]"
     >
-      <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-            Controls
-          </h2>
-          <GuidedModeSwitch mode={mode} onChange={setMode} compact />
+      <SimulationActivityPanel
+        prompt="Move the observation, run the null model, then see how much simulated tail area remains."
+        modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
+      >
+        <div className="grid gap-2">
+          <ExperimentActionButton
+            title="Move farther from null"
+            description="Set the observed mean to 56, farther from the null mean of 50."
+            isActive={controls.observedSampleMean >= 56}
+            onClick={() => applyExperiment({ observedSampleMean: 56 })}
+          />
+          <ExperimentActionButton
+            title="Use a larger sample"
+            description="Set n to 64 so the null distribution should tighten."
+            isActive={controls.sampleSize >= 64}
+            onClick={() => applyExperiment({ sampleSize: 64 })}
+          />
+          <ExperimentActionButton
+            title="Use greater-than tail"
+            description="Count only null simulations at or above the observation."
+            isActive={controls.tailMode === "greater"}
+            onClick={() => applyExperiment({ tailMode: "greater" })}
+          />
         </div>
-        <div className="mt-2.5 space-y-2.5">
-          <TryThisPrompt>
-            move the observed sample mean farther from 50 and run again. Watch how
-            the tail area changes.
-          </TryThisPrompt>
 
-          <div className="grid grid-cols-[1fr_7.25rem] gap-2">
-            <button
-              type="button"
-              aria-label="Run simulation"
-              disabled={isRunning}
-              onClick={runSimulation}
-              className="h-9 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-            >
-              {isRunning ? "Running" : "Run"}
-            </button>
-            <button
-              type="button"
-              onClick={resetSimulation}
-              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
-            >
-              Reset defaults
-            </button>
-          </div>
+        <StepperControl
+          label="Observed mean"
+          min={42}
+          max={58}
+          step={1}
+          value={controls.observedSampleMean}
+          onChange={(value) => updateControls("observedSampleMean", value)}
+          formatValue={(value) => String(roundTo(value, 1))}
+        />
+        <StepperControl
+          label="Sample size n"
+          min={2}
+          max={100}
+          step={4}
+          value={controls.sampleSize}
+          onChange={(value) => updateControls("sampleSize", value)}
+        />
 
+        <div className="space-y-2">
+          <RunExperimentButton
+            isRunning={isRunning}
+            onClick={runSimulation}
+            ariaLabel="Run p-value null model experiment"
+          />
+          <button
+            type="button"
+            onClick={resetSimulation}
+            className="h-9 w-full rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
+          >
+            Reset defaults
+          </button>
+          <DirtySimulationNotice isDirty={isDirty} />
+        </div>
+
+        <AdvancedSettings>
           <fieldset>
-            <legend className="text-xs font-semibold text-ink sm:text-sm">Tail mode</legend>
+            <legend className="text-xs font-semibold text-ink sm:text-sm">
+              Tail mode
+            </legend>
             <div className="mt-1.5 grid grid-cols-3 gap-1 rounded-md border border-line bg-white p-1">
               {tailModeOptions.map((option) => {
                 const isSelected = controls.tailMode === option.value;
@@ -944,7 +984,10 @@ export function PValueNullModelSimulation() {
           />
 
           <div className="space-y-1">
-            <label htmlFor="pvalue-seed" className="text-xs font-semibold text-ink sm:text-sm">
+            <label
+              htmlFor="pvalue-seed"
+              className="text-xs font-semibold text-ink sm:text-sm"
+            >
               Seed
             </label>
             <div className="grid grid-cols-[1fr_4.25rem] gap-2">
@@ -971,11 +1014,10 @@ export function PValueNullModelSimulation() {
               </button>
             </div>
           </div>
+        </AdvancedSettings>
+      </SimulationActivityPanel>
 
-        </div>
-      </section>
-
-      <section className="flex min-h-[26rem] flex-col p-2 lg:min-h-0">
+      <section className="flex min-h-[26rem] flex-col p-2 min-[960px]:min-h-0">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
@@ -1014,9 +1056,7 @@ export function PValueNullModelSimulation() {
                 result.controls.observedSampleMean
               )}
             </p>
-            <div className="mt-2">
-              <DirtySimulationNotice isDirty={isDirty} />
-            </div>
+            <WhatChangedCallout>{whatChanged}</WhatChangedCallout>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
             Null mean = {P_VALUE_NULL_MEAN}
@@ -1026,7 +1066,7 @@ export function PValueNullModelSimulation() {
           <div
             key={animationKey}
             className={[
-              "w-full transition-opacity duration-200",
+              "w-full transition-opacity duration-200 motion-reduce:transition-none",
               isRunning ? "opacity-55" : "opacity-100"
             ].join(" ")}
           >
@@ -1041,11 +1081,14 @@ export function PValueNullModelSimulation() {
         </div>
       </section>
 
-      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 min-[960px]:border-l min-[960px]:border-t-0 min-[960px]:overflow-y-auto">
         <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
           Results
         </h2>
-        <dl className="mt-3 divide-y divide-line border-y border-line">
+        <dl
+          aria-live="polite"
+          className="mt-3 divide-y divide-line border-y border-line"
+        >
           {summaryItems.map((item) => (
             <div
               key={`${animationKey}-${item.label}`}

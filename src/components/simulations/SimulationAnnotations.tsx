@@ -48,7 +48,7 @@ export function DirtySimulationNotice({ isDirty }: DirtySimulationNoticeProps) {
       role="status"
       className="border-l-2 border-amber-500 pl-3 text-xs font-medium text-amber-900"
     >
-      Settings changed - click Run to update the simulation.
+      Settings changed - click Run experiment to update the simulation.
     </p>
   );
 }

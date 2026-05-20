@@ -15,9 +15,16 @@ import {
 } from "@/components/simulations/PredictionPrompt";
 import { SimulationAssumptionsPanel } from "@/components/simulations/SimulationAssumptionsPanel";
 import {
+  AdvancedSettings,
+  ExperimentActionButton,
+  RunExperimentButton,
+  SimulationActivityPanel,
+  StepperControl,
+  WhatChangedCallout
+} from "@/components/simulations/SimulationActivity";
+import {
   DirtySimulationNotice,
-  FormulaStrip,
-  TryThisPrompt
+  FormulaStrip
 } from "@/components/simulations/SimulationAnnotations";
 import { SimulationExportButtons } from "@/components/simulations/SimulationExportButtons";
 import {
@@ -320,6 +327,13 @@ export function SamplingDistributionSimulation() {
     updateControls("seed", Math.floor(Math.random() * 999999) + 1);
   };
 
+  const applyExperiment = (changes: Partial<SamplingScenarioControls>) => {
+    setControls((current) => ({
+      ...current,
+      ...changes
+    }));
+  };
+
   const updateScenario = <Key extends keyof SamplingScenarioControls>(
     scenario: "A" | "B",
     key: Key,
@@ -397,6 +411,13 @@ export function SamplingDistributionSimulation() {
       value: String(result.controls.repeatedSamples)
     }
   ];
+  const whatChanged = `${result.controls.distribution} population, n = ${result.controls.sampleSize}, repeated samples = ${result.controls.repeatedSamples}. The simulated SD is ${roundTo(
+    result.sampleMeanSd,
+    2
+  )}, and the expected standard error is ${roundTo(
+    result.expectedStandardError,
+    2
+  )}.`;
 
   if (mode === "guided") {
     const conclusion = comparison
@@ -412,17 +433,12 @@ export function SamplingDistributionSimulation() {
     return (
       <div
         aria-busy={isComparisonRunning}
-        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_20rem] lg:overflow-hidden"
+        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_15rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_20rem]"
       >
-        <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-              Controls
-            </h2>
-            <GuidedModeSwitch mode={mode} onChange={setMode} compact />
-          </div>
-
-          <div className="mt-2 space-y-2">
+        <SimulationActivityPanel
+          prompt="Make a prediction, run both scenarios, then compare the two simulated sampling distributions."
+          modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
+        >
             <div className="space-y-1">
               <label
                 htmlFor="sampling-comparison-preset"
@@ -446,21 +462,14 @@ export function SamplingDistributionSimulation() {
 
             <PredictionPrompt value={prediction} onChange={setPrediction} />
 
-            <section className="border-t border-line pt-2">
-              <div className="flex items-center justify-between gap-2">
-                <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
-                  Step 2: Run
-                </h3>
-              </div>
-              <button
-                type="button"
-                aria-label="Run comparison"
-                disabled={isComparisonRunning}
+            <section className="border-t border-line pt-3">
+              <RunExperimentButton
+                isRunning={isComparisonRunning}
                 onClick={runComparison}
-                className="mt-1.5 h-8 w-full rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-              >
-                {isComparisonRunning ? "Running" : "Run comparison"}
-              </button>
+                label="Run comparison"
+                runningLabel="Running"
+                ariaLabel="Run sampling comparison"
+              />
               {comparisonNotice ? (
                 <p
                   role="status"
@@ -496,10 +505,9 @@ export function SamplingDistributionSimulation() {
               ]}
               note={simulationUncertaintyNote}
             />
-          </div>
-        </section>
+        </SimulationActivityPanel>
 
-        <section className="flex min-h-[26rem] flex-col p-2.5 lg:min-h-0">
+        <section className="flex min-h-[26rem] flex-col p-2.5 min-[960px]:min-h-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
@@ -618,7 +626,7 @@ export function SamplingDistributionSimulation() {
           </div>
         </section>
 
-        <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+        <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 min-[960px]:border-l min-[960px]:border-t-0 min-[960px]:overflow-y-auto">
           {comparison ? (
             <div className="space-y-2">
               {prediction ? (
@@ -659,40 +667,66 @@ export function SamplingDistributionSimulation() {
   return (
     <div
       aria-busy={isRunning}
-      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_18rem] lg:overflow-hidden"
+      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_13rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_18rem]"
     >
-      <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-            Controls
-          </h2>
-          <GuidedModeSwitch mode={mode} onChange={setMode} compact />
+      <SimulationActivityPanel
+        prompt="Choose a move, run the experiment, then watch how the sample means respond."
+        modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
+      >
+        <div className="grid gap-2">
+          <ExperimentActionButton
+            title="Use a larger sample"
+            description="Set n to 80 so sample means should cluster more tightly."
+            isActive={controls.sampleSize >= 80}
+            onClick={() => applyExperiment({ sampleSize: 80 })}
+          />
+          <ExperimentActionButton
+            title="Try a skewed population"
+            description="Keep the mean fixed but sample from a skewed population."
+            isActive={controls.distribution === "skewed"}
+            onClick={() => applyExperiment({ distribution: "skewed" })}
+          />
+          <ExperimentActionButton
+            title="Increase population spread"
+            description="Raise SD to 20 and see how much noisier the sample means become."
+            isActive={controls.populationSd >= 20}
+            onClick={() => applyExperiment({ populationSd: 20 })}
+          />
         </div>
-        <div className="mt-2.5 space-y-2.5">
-          <TryThisPrompt>
-            increase n from 10 to 80 and run again. Compare the SD of sample means
-            with the expected standard error.
-          </TryThisPrompt>
 
-          <div className="grid grid-cols-[1fr_7.25rem] gap-2">
-            <button
-              type="button"
-              aria-label="Run simulation"
-              disabled={isRunning}
-              onClick={runSimulation}
-              className="h-9 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-            >
-              {isRunning ? "Running" : "Run"}
-            </button>
-            <button
-              type="button"
-              onClick={resetSimulation}
-              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
-            >
-              Reset defaults
-            </button>
-          </div>
+        <StepperControl
+          label="Sample size n"
+          min={2}
+          max={100}
+          step={5}
+          value={controls.sampleSize}
+          onChange={(value) => updateControls("sampleSize", value)}
+        />
+        <StepperControl
+          label="Population SD"
+          min={1}
+          max={20}
+          value={controls.populationSd}
+          onChange={(value) => updateControls("populationSd", value)}
+        />
 
+        <div className="space-y-2">
+          <RunExperimentButton
+            isRunning={isRunning}
+            onClick={runSimulation}
+            ariaLabel="Run sampling experiment"
+          />
+          <button
+            type="button"
+            onClick={resetSimulation}
+            className="h-9 w-full rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
+          >
+            Reset defaults
+          </button>
+          <DirtySimulationNotice isDirty={isDirty} />
+        </div>
+
+        <AdvancedSettings>
           <fieldset>
             <legend className="text-xs font-semibold text-ink sm:text-sm">
               Population distribution
@@ -748,7 +782,10 @@ export function SamplingDistributionSimulation() {
           />
 
           <div className="space-y-1">
-            <label htmlFor="seed" className="text-xs font-semibold text-ink sm:text-sm">
+            <label
+              htmlFor="seed"
+              className="text-xs font-semibold text-ink sm:text-sm"
+            >
               Seed
             </label>
             <div className="grid grid-cols-[1fr_4.25rem] gap-2">
@@ -775,11 +812,10 @@ export function SamplingDistributionSimulation() {
               </button>
             </div>
           </div>
+        </AdvancedSettings>
+      </SimulationActivityPanel>
 
-        </div>
-      </section>
-
-      <section className="flex min-h-[26rem] flex-col p-2.5 lg:min-h-0">
+      <section className="flex min-h-[26rem] flex-col p-2.5 min-[960px]:min-h-0">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
@@ -789,13 +825,9 @@ export function SamplingDistributionSimulation() {
               Repeated samples from a population with mean 50.
             </p>
             <div className="mt-2">
-              <FormulaStrip>
-                Expected SE = σ / √n
-              </FormulaStrip>
+              <FormulaStrip>Expected SE = sigma / sqrt(n)</FormulaStrip>
             </div>
-            <div className="mt-2">
-              <DirtySimulationNotice isDirty={isDirty} />
-            </div>
+            <WhatChangedCallout>{whatChanged}</WhatChangedCallout>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
             Mean = 50
@@ -805,7 +837,7 @@ export function SamplingDistributionSimulation() {
           <div
             key={animationKey}
             className={[
-              "w-full transition-opacity duration-200",
+              "w-full transition-opacity duration-200 motion-reduce:transition-none",
               isRunning ? "opacity-55" : "opacity-100"
             ].join(" ")}
           >
@@ -820,11 +852,14 @@ export function SamplingDistributionSimulation() {
         </div>
       </section>
 
-      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 min-[960px]:border-l min-[960px]:border-t-0 min-[960px]:overflow-y-auto">
         <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
           Results
         </h2>
-        <dl className="mt-3 divide-y divide-line border-y border-line">
+        <dl
+          aria-live="polite"
+          className="mt-3 divide-y divide-line border-y border-line"
+        >
           {summaryItems.map((item) => (
             <div
               key={`${animationKey}-${item.label}`}

@@ -20,10 +20,17 @@ import {
 } from "@/components/simulations/PredictionPrompt";
 import { SimulationAssumptionsPanel } from "@/components/simulations/SimulationAssumptionsPanel";
 import {
+  AdvancedSettings,
+  ExperimentActionButton,
+  RunExperimentButton,
+  SimulationActivityPanel,
+  StepperControl,
+  WhatChangedCallout
+} from "@/components/simulations/SimulationActivity";
+import {
   DirtySimulationNotice,
   FormulaStrip,
-  SimulationLegend,
-  TryThisPrompt
+  SimulationLegend
 } from "@/components/simulations/SimulationAnnotations";
 import { SimulationReflectionPanel } from "@/components/simulations/SimulationReflectionPanel";
 import {
@@ -435,6 +442,13 @@ export function ConfidenceIntervalsSimulation() {
     updateControls("seed", Math.floor(Math.random() * 999999) + 1);
   };
 
+  const applyExperiment = (changes: Partial<ConfidenceScenarioControls>) => {
+    setControls((current) => ({
+      ...current,
+      ...changes
+    }));
+  };
+
   const updateScenario = <Key extends keyof ConfidenceScenarioControls>(
     scenario: "A" | "B",
     key: Key,
@@ -484,7 +498,7 @@ export function ConfidenceIntervalsSimulation() {
     comparison !== null &&
     !confidenceComparisonMatchesControls(scenarioA, scenarioB, comparison);
   const comparisonNotice = presetChangedPending
-    ? "Preset changed — run comparison to update."
+    ? "Preset changed - run comparison to update."
     : comparisonIsDirty
       ? "Settings changed - run comparison to update."
       : null;
@@ -516,6 +530,10 @@ export function ConfidenceIntervalsSimulation() {
       value: roundTo(result.averageMarginOfError, 2)
     }
   ];
+  const whatChanged = `${result.controls.confidenceLevel}% confidence, n = ${result.controls.sampleSize}, repeated intervals = ${result.controls.repeatedIntervals}. Observed coverage is ${roundTo(
+    result.coveragePercent,
+    1
+  )}%, and average width is ${roundTo(result.averageFullIntervalWidth, 2)}.`;
 
   if (mode === "guided") {
     const selectedPreset = getPreset(presetId);
@@ -529,17 +547,12 @@ export function ConfidenceIntervalsSimulation() {
     return (
       <div
         aria-busy={isComparisonRunning}
-        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_20rem] lg:overflow-hidden"
+        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_15rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_20rem]"
       >
-        <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
-          <div className="flex items-center justify-between gap-2">
-            <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-              Controls
-            </h2>
-            <GuidedModeSwitch mode={mode} onChange={setMode} compact />
-          </div>
-
-          <div className="mt-2 space-y-2">
+        <SimulationActivityPanel
+          prompt="Predict which interval set will be wider, run both scenarios, then compare coverage with width."
+          modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
+        >
             <div className="space-y-1">
               <label
                 htmlFor="confidence-comparison-preset"
@@ -569,19 +582,14 @@ export function ConfidenceIntervalsSimulation() {
               question="Which scenario do you expect to produce wider intervals?"
             />
 
-            <section className="border-t border-line pt-2">
-              <h3 className="text-xs font-semibold uppercase tracking-[0.12em] text-moss">
-                Step 2: Run
-              </h3>
-              <button
-                type="button"
-                aria-label="Run confidence interval comparison"
-                disabled={isComparisonRunning}
+            <section className="border-t border-line pt-3">
+              <RunExperimentButton
+                isRunning={isComparisonRunning}
                 onClick={runComparison}
-                className="mt-1.5 h-8 w-full rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-              >
-                {isComparisonRunning ? "Running" : "Run comparison"}
-              </button>
+                label="Run comparison"
+                runningLabel="Running"
+                ariaLabel="Run confidence interval comparison"
+              />
               {comparisonNotice ? (
                 <p
                   role="status"
@@ -617,10 +625,9 @@ export function ConfidenceIntervalsSimulation() {
               ]}
               note="Observed coverage varies from run to run. Increasing repeated intervals makes the simulated coverage more stable."
             />
-          </div>
-        </section>
+        </SimulationActivityPanel>
 
-        <section className="flex min-h-[26rem] flex-col p-2.5 lg:min-h-0">
+        <section className="flex min-h-[26rem] flex-col p-2.5 min-[960px]:min-h-0">
           <div className="flex flex-wrap items-start justify-between gap-3">
             <div>
               <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
@@ -737,7 +744,7 @@ export function ConfidenceIntervalsSimulation() {
           </div>
         </section>
 
-        <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+        <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 min-[960px]:border-l min-[960px]:border-t-0 min-[960px]:overflow-y-auto">
           <div className="space-y-2">
             {comparison ? (
               <>
@@ -795,40 +802,66 @@ export function ConfidenceIntervalsSimulation() {
   return (
     <div
       aria-busy={isRunning}
-      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm lg:grid lg:grid-cols-[17rem_minmax(0,1fr)_18rem] lg:overflow-hidden"
+      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_13rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_18rem]"
     >
-      <section className="min-h-0 border-b border-line bg-paper/70 p-2.5 lg:border-b-0 lg:border-r lg:overflow-y-auto">
-        <div className="flex items-center justify-between gap-2">
-          <h2 className="shrink-0 text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-            Controls
-          </h2>
-          <GuidedModeSwitch mode={mode} onChange={setMode} compact />
+      <SimulationActivityPanel
+        prompt="Choose a confidence-interval move, run the experiment, then compare coverage with width."
+        modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
+      >
+        <div className="grid gap-2">
+          <ExperimentActionButton
+            title="Raise confidence"
+            description="Use 99% intervals and watch the width tradeoff."
+            isActive={controls.confidenceLevel === 99}
+            onClick={() => applyExperiment({ confidenceLevel: 99 })}
+          />
+          <ExperimentActionButton
+            title="Use a larger sample"
+            description="Set n to 80 so each interval should narrow."
+            isActive={controls.sampleSize >= 80}
+            onClick={() => applyExperiment({ sampleSize: 80 })}
+          />
+          <ExperimentActionButton
+            title="Increase population spread"
+            description="Raise SD to 20 and see how uncertainty expands."
+            isActive={controls.populationSd >= 20}
+            onClick={() => applyExperiment({ populationSd: 20 })}
+          />
         </div>
-        <div className="mt-2.5 space-y-2.5">
-          <TryThisPrompt>
-            switch from 90% to 99% and run again. Watch what happens to coverage
-            and interval width.
-          </TryThisPrompt>
 
-          <div className="grid grid-cols-[1fr_7.25rem] gap-2">
-            <button
-              type="button"
-              aria-label="Run simulation"
-              disabled={isRunning}
-              onClick={runSimulation}
-              className="h-9 rounded-md border border-moss bg-moss px-3 text-sm font-semibold text-white transition hover:bg-moss-dark disabled:cursor-wait disabled:bg-moss-dark"
-            >
-              {isRunning ? "Running" : "Run"}
-            </button>
-            <button
-              type="button"
-              onClick={resetSimulation}
-              className="h-9 rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
-            >
-              Reset defaults
-            </button>
-          </div>
+        <StepperControl
+          label="Sample size n"
+          min={2}
+          max={100}
+          step={5}
+          value={controls.sampleSize}
+          onChange={(value) => updateControls("sampleSize", value)}
+        />
+        <StepperControl
+          label="Population SD"
+          min={1}
+          max={20}
+          value={controls.populationSd}
+          onChange={(value) => updateControls("populationSd", value)}
+        />
 
+        <div className="space-y-2">
+          <RunExperimentButton
+            isRunning={isRunning}
+            onClick={runSimulation}
+            ariaLabel="Run confidence interval experiment"
+          />
+          <button
+            type="button"
+            onClick={resetSimulation}
+            className="h-9 w-full rounded-md border border-line bg-white px-3 text-sm font-semibold text-ink transition hover:border-moss hover:text-moss"
+          >
+            Reset defaults
+          </button>
+          <DirtySimulationNotice isDirty={isDirty} />
+        </div>
+
+        <AdvancedSettings>
           <fieldset>
             <legend className="text-xs font-semibold text-ink sm:text-sm">
               Confidence level
@@ -884,7 +917,10 @@ export function ConfidenceIntervalsSimulation() {
           />
 
           <div className="space-y-1">
-            <label htmlFor="ci-seed" className="text-xs font-semibold text-ink sm:text-sm">
+            <label
+              htmlFor="ci-seed"
+              className="text-xs font-semibold text-ink sm:text-sm"
+            >
               Seed
             </label>
             <div className="grid grid-cols-[1fr_4.25rem] gap-2">
@@ -911,11 +947,10 @@ export function ConfidenceIntervalsSimulation() {
               </button>
             </div>
           </div>
+        </AdvancedSettings>
+      </SimulationActivityPanel>
 
-        </div>
-      </section>
-
-      <section className="flex min-h-[26rem] flex-col p-2.5 lg:min-h-0">
+      <section className="flex min-h-[26rem] flex-col p-2.5 min-[960px]:min-h-0">
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div>
             <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
@@ -945,9 +980,7 @@ export function ConfidenceIntervalsSimulation() {
             <p className="mt-2 text-xs leading-4 text-slate-500">
               {intervalDisplayNote} Currently displaying {displayedIntervalCount}.
             </p>
-            <div className="mt-2">
-              <DirtySimulationNotice isDirty={isDirty} />
-            </div>
+            <WhatChangedCallout>{whatChanged}</WhatChangedCallout>
           </div>
           <span className="rounded-full border border-line bg-paper px-3 py-1 text-xs font-semibold uppercase tracking-[0.1em] text-slate-600">
             Mean = 50
@@ -957,7 +990,7 @@ export function ConfidenceIntervalsSimulation() {
           <div
             key={animationKey}
             className={[
-              "w-full transition-opacity duration-200",
+              "w-full transition-opacity duration-200 motion-reduce:transition-none",
               isRunning ? "opacity-55" : "opacity-100"
             ].join(" ")}
           >
@@ -970,11 +1003,14 @@ export function ConfidenceIntervalsSimulation() {
         </div>
       </section>
 
-      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 lg:border-l lg:border-t-0 lg:overflow-y-auto">
+      <aside className="min-h-0 border-t border-line bg-[#fbfcfb] p-2.5 min-[960px]:border-l min-[960px]:border-t-0 min-[960px]:overflow-y-auto">
         <h2 className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
           Results
         </h2>
-        <dl className="mt-3 divide-y divide-line border-y border-line">
+        <dl
+          aria-live="polite"
+          className="mt-3 divide-y divide-line border-y border-line"
+        >
           {summaryItems.map((item) => (
             <div
               key={`${animationKey}-${item.label}`}
