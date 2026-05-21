@@ -5,6 +5,8 @@ export const unit01ExerciseSet: ExerciseSet = {
   title: "Interactive exercises",
   intro:
     "Use these checks to test whether you can reason about measurement, uncertainty, and defensible scientific wording.",
+  conceptIds: ["measurement-uncertainty", "statistical-conclusions"],
+  recommendedSimulationSlugs: [],
   exercises: [
     {
       id: "unit01-precision-accuracy",

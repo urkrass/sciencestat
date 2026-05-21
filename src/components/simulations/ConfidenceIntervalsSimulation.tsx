@@ -39,6 +39,7 @@ import {
   buildCsvFromRows,
   SimulationExportButtons
 } from "@/components/simulations/SimulationExportButtons";
+import { SimulationLabShell } from "@/components/simulations/SimulationLabShell";
 import {
   buildConfidenceComparisonResult,
   confidenceComparisonMatchesControls,
@@ -567,10 +568,7 @@ export function ConfidenceIntervalsSimulation() {
       : null;
 
     return (
-      <div
-        aria-busy={isComparisonRunning}
-        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_15rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_20rem]"
-      >
+      <SimulationLabShell isBusy={isComparisonRunning} resultColumn="wide">
         <SimulationActivityPanel
           prompt="Predict which interval set will be wider, run both scenarios, then compare coverage with width."
           modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
@@ -821,15 +819,12 @@ export function ConfidenceIntervalsSimulation() {
             />
           </div>
         </aside>
-      </div>
+      </SimulationLabShell>
     );
   }
 
   return (
-    <div
-      aria-busy={isRunning}
-      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_13rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_18rem]"
-    >
+    <SimulationLabShell isBusy={isRunning}>
       <SimulationActivityPanel
         prompt="Choose a confidence-interval move, run the experiment, then compare coverage with width."
         modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
@@ -1074,6 +1069,6 @@ export function ConfidenceIntervalsSimulation() {
           </p>
         </section>
       </aside>
-    </div>
+    </SimulationLabShell>
   );
 }

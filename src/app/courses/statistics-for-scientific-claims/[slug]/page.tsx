@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
 import { notFound } from "next/navigation";
-import { CourseSidebar } from "@/components/CourseSidebar";
+import { UnitLearningHeader } from "@/components/UnitLearningHeader";
 import { UnitWorkspace } from "@/components/UnitWorkspace";
 import { getExerciseSetForUnit } from "@/content/exercises";
 import {
@@ -49,30 +49,15 @@ export default async function UnitPage({ params }: UnitPageProps) {
   const exerciseSet = getExerciseSetForUnit(unit.slug);
 
   return (
-    <main className="mx-auto h-dvh w-full max-w-7xl overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
-      <div className="grid h-full min-h-0 gap-4 lg:grid-cols-[18rem_1fr]">
-        <div className="min-h-0 min-w-0 lg:col-start-2 lg:row-start-1">
-          <div className="sr-only">
-            <h1>
-              Unit {String(unit.number).padStart(2, "0")}: {unit.title}
-            </h1>
-            <p>{unit.description}</p>
-          </div>
-
-          <UnitWorkspace
-            exerciseSet={exerciseSet}
-            pdfPath={unit.pdfPath}
-            title={unit.title}
-          />
-        </div>
-        <div className="min-h-0 lg:col-start-1 lg:row-start-1">
-          <CourseSidebar
-            activeSlug={unit.slug}
-            activeUnit={unit}
-            nextUnit={next}
-            previousUnit={previous}
-          />
-        </div>
+    <main className="mx-auto flex h-dvh w-full max-w-7xl flex-col overflow-hidden px-4 py-4 sm:px-6 lg:px-8">
+      <UnitLearningHeader
+        unit={unit}
+        exerciseSet={exerciseSet}
+        nextUnit={next}
+        previousUnit={previous}
+      />
+      <div className="mt-3 min-h-0 flex-1">
+        <UnitWorkspace exerciseSet={exerciseSet} unit={unit} />
       </div>
     </main>
   );

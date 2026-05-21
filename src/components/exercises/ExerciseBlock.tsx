@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import Link from "next/link";
+import { Activity, BookOpen } from "lucide-react";
+import { getConcepts } from "@/content/concepts";
 import type { Exercise, ExerciseSet } from "@/content/exercises";
+import { getSimulation } from "@/content/simulations";
 import { ClaimClassifierExercise } from "./ClaimClassifierExercise";
 import { MultipleChoiceExercise } from "./MultipleChoiceExercise";
 import { NumericExercise } from "./NumericExercise";
@@ -33,6 +37,18 @@ function getStorageKey(unitSlug: string) {
 
 function getActiveIndexStorageKey(unitSlug: string) {
   return `sciencestat:exercises:${unitSlug}:activeIndex`;
+}
+
+function getPracticeKindLabel(exercise: Exercise) {
+  if (exercise.practiceKind === "claim") {
+    return "Apply to claim";
+  }
+
+  if (exercise.practiceKind === "output") {
+    return "Interpret output";
+  }
+
+  return "Check understanding";
 }
 
 export function ExerciseBlock({ exerciseSet, workspaceSwitch }: ExerciseBlockProps) {
@@ -120,6 +136,50 @@ export function ExerciseBlock({ exerciseSet, workspaceSwitch }: ExerciseBlockPro
         0
       ),
     [exerciseSet.exercises, exerciseState]
+  );
+
+  const incorrectCheckedExercises = useMemo(
+    () =>
+      exerciseSet.exercises.filter((exercise) => {
+        const state = exerciseState[exercise.id];
+
+        return state?.checked && !state.correct;
+      }),
+    [exerciseSet.exercises, exerciseState]
+  );
+
+  const reviewConcepts = useMemo(() => {
+    const conceptIds = new Set(
+      incorrectCheckedExercises.flatMap(
+        (exercise) => exercise.conceptIds ?? exerciseSet.conceptIds ?? []
+      )
+    );
+
+    if (conceptIds.size === 0) {
+      return getConcepts(exerciseSet.conceptIds ?? []);
+    }
+
+    return getConcepts([...conceptIds]);
+  }, [exerciseSet.conceptIds, incorrectCheckedExercises]);
+
+  const misconceptionTags = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          incorrectCheckedExercises.flatMap(
+            (exercise) => exercise.misconceptionTags ?? []
+          )
+        )
+      ),
+    [incorrectCheckedExercises]
+  );
+
+  const recommendedSimulations = useMemo(
+    () =>
+      (exerciseSet.recommendedSimulationSlugs ?? [])
+        .map((slug) => getSimulation(slug))
+        .filter((simulation) => simulation?.status === "available" && simulation.href),
+    [exerciseSet.recommendedSimulationSlugs]
   );
 
   const updateExerciseState = (exerciseId: string, patch: Partial<ExerciseAnswerState>) => {
@@ -250,6 +310,7 @@ export function ExerciseBlock({ exerciseSet, workspaceSwitch }: ExerciseBlockPro
               {!isComplete ? (
                 <span className="ml-2 text-sm font-medium text-slate-500">
                   Question {questionNumber} of {exerciseCount}
+                  {activeExercise ? ` / ${getPracticeKindLabel(activeExercise)}` : ""}
                 </span>
               ) : null}
             </p>
@@ -263,6 +324,60 @@ export function ExerciseBlock({ exerciseSet, workspaceSwitch }: ExerciseBlockPro
                 {correctCount} correct. You can review your responses or reset the
                 practice set.
               </p>
+              <div className="mt-5 grid w-full max-w-4xl gap-3 md:grid-cols-2">
+                <section className="rounded-md border border-line bg-white/75 p-4">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-moss">
+                    <BookOpen aria-hidden="true" className="h-4 w-4" />
+                    Review focus
+                  </h4>
+                  {reviewConcepts.length > 0 ? (
+                    <ul className="mt-3 space-y-2 text-sm leading-5 text-slate-700">
+                      {reviewConcepts.map((concept) => (
+                        <li key={concept.id}>
+                          <span className="font-semibold text-ink">
+                            {concept.label}:
+                          </span>{" "}
+                          {concept.description}
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="mt-3 text-sm leading-5 text-slate-700">
+                      Review the explanation for any answer that felt uncertain.
+                    </p>
+                  )}
+                  {misconceptionTags.length > 0 ? (
+                    <p className="mt-3 border-l-2 border-amber-400 pl-3 text-sm leading-5 text-amber-950">
+                      Watch for: {misconceptionTags.join(", ")}.
+                    </p>
+                  ) : null}
+                </section>
+                <section className="rounded-md border border-line bg-white/75 p-4">
+                  <h4 className="flex items-center gap-2 text-sm font-semibold uppercase tracking-[0.12em] text-moss">
+                    <Activity aria-hidden="true" className="h-4 w-4" />
+                    Try next
+                  </h4>
+                  {recommendedSimulations.length > 0 ? (
+                    <div className="mt-3 flex flex-wrap gap-2">
+                      {recommendedSimulations.map((simulation) =>
+                        simulation?.href ? (
+                          <Link
+                            key={simulation.slug}
+                            href={simulation.href}
+                            className="inline-flex h-9 items-center justify-center rounded-md border border-line bg-white px-3 text-sm font-medium text-ink transition hover:border-moss hover:text-moss"
+                          >
+                            {simulation.title}
+                          </Link>
+                        ) : null
+                      )}
+                    </div>
+                  ) : (
+                    <p className="mt-3 text-sm leading-5 text-slate-700">
+                      Continue to the next unit and keep the claim wording cautious.
+                    </p>
+                  )}
+                </section>
+              </div>
               <div className="mt-6 flex flex-wrap gap-2">
                 <button
                   type="button"

@@ -3,26 +3,31 @@
 import { useState } from "react";
 import { ExerciseBlock } from "@/components/exercises/ExerciseBlock";
 import { PdfViewerShell } from "@/components/PdfViewerShell";
+import { UnitReaderGuide } from "@/components/UnitReaderGuide";
 import type { ExerciseSet } from "@/content/exercises";
+import type { StatisticsUnit } from "@/content/statisticsUnits";
 
 type WorkspaceTab = "reader" | "practice";
 
 type UnitWorkspaceProps = {
   exerciseSet: ExerciseSet | null;
-  pdfPath: string;
-  title: string;
+  unit: StatisticsUnit;
 };
 
 const modeButtonClass =
   "inline-flex h-8 items-center justify-center rounded px-3 text-xs font-semibold transition";
 
-export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProps) {
+export function UnitWorkspace({ exerciseSet, unit }: UnitWorkspaceProps) {
   const [activeTab, setActiveTab] = useState<WorkspaceTab>("reader");
 
   if (!exerciseSet) {
     return (
-      <section aria-label={`${title} workspace`} className="h-full min-h-0">
-        <PdfViewerShell file={pdfPath} title={title} />
+      <section aria-label={`${unit.title} workspace`} className="h-full min-h-0">
+        <PdfViewerShell
+          file={unit.pdfPath}
+          title={unit.title}
+          readerContext={<UnitReaderGuide unit={unit} />}
+        />
       </section>
     );
   }
@@ -69,7 +74,7 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
   );
 
   return (
-    <section aria-label={`${title} workspace`} className="h-full min-h-0">
+    <section aria-label={`${unit.title} workspace`} className="h-full min-h-0">
       <div
         id="unit-reader-panel"
         role="tabpanel"
@@ -78,7 +83,12 @@ export function UnitWorkspace({ exerciseSet, pdfPath, title }: UnitWorkspaceProp
         className="h-full min-h-0"
       >
         {activeTab === "reader" ? (
-          <PdfViewerShell file={pdfPath} title={title} workspaceSwitch={workspaceSwitch} />
+          <PdfViewerShell
+            file={unit.pdfPath}
+            title={unit.title}
+            readerContext={<UnitReaderGuide unit={unit} />}
+            workspaceSwitch={workspaceSwitch}
+          />
         ) : null}
       </div>
 

@@ -29,6 +29,7 @@ import {
   FormulaStrip
 } from "@/components/simulations/SimulationAnnotations";
 import { SimulationExportButtons } from "@/components/simulations/SimulationExportButtons";
+import { SimulationLabShell } from "@/components/simulations/SimulationLabShell";
 import {
   buildSamplingComparisonResult,
   createSamplingDistributionResult,
@@ -447,10 +448,7 @@ export function SamplingDistributionSimulation() {
           : null;
 
     return (
-      <div
-        aria-busy={isComparisonRunning}
-        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_15rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_20rem]"
-      >
+      <SimulationLabShell isBusy={isComparisonRunning} resultColumn="wide">
         <SimulationActivityPanel
           prompt="Make a prediction, run both scenarios, then compare the two simulated sampling distributions."
           modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
@@ -679,15 +677,12 @@ export function SamplingDistributionSimulation() {
             </section>
           )}
         </aside>
-      </div>
+      </SimulationLabShell>
     );
   }
 
   return (
-    <div
-      aria-busy={isRunning}
-      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_13rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_18rem]"
-    >
+    <SimulationLabShell isBusy={isRunning}>
       <SimulationActivityPanel
         prompt="Choose a move, run the experiment, then watch how the sample means respond."
         modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
@@ -915,6 +910,6 @@ export function SamplingDistributionSimulation() {
           </p>
         </section>
       </aside>
-    </div>
+    </SimulationLabShell>
   );
 }

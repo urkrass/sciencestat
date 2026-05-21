@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight } from "lucide-react";
+import { ConceptChipList } from "@/components/ConceptChipList";
 import type { Simulation } from "@/content/simulations";
 
 type SimulationCardProps = {
@@ -29,6 +30,13 @@ export function SimulationCard({ simulation }: SimulationCardProps) {
         </span>
       </div>
       <p className="mt-3 text-sm leading-6 text-slate-600">{simulation.description}</p>
+      <p className="mt-2 border-l-2 border-moss pl-3 text-xs leading-5 text-slate-600">
+        <span className="font-semibold text-ink">Learning goal:</span>{" "}
+        {simulation.learningGoal}
+      </p>
+      <div className="mt-3">
+        <ConceptChipList conceptIds={simulation.conceptIds} compact />
+      </div>
       <div className="mt-auto pt-4">
         {isAvailable ? (
           <Link

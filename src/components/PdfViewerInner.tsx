@@ -21,6 +21,7 @@ pdfjs.GlobalWorkerOptions.workerSrc = new URL(
 export type PdfViewerProps = {
   file: string;
   title: string;
+  readerContext?: React.ReactNode;
   workspaceSwitch?: React.ReactNode;
 };
 
@@ -66,7 +67,12 @@ type ReaderSize = {
 const magnifierSize = 190;
 const magnifierScale = 2.25;
 
-export default function PdfViewerInner({ file, title, workspaceSwitch }: PdfViewerProps) {
+export default function PdfViewerInner({
+  file,
+  title,
+  readerContext,
+  workspaceSwitch
+}: PdfViewerProps) {
   const containerRef = useRef<HTMLDivElement>(null);
   const readerRef = useRef<HTMLDivElement>(null);
   const magnifierCanvasRef = useRef<HTMLCanvasElement>(null);
@@ -426,6 +432,9 @@ export default function PdfViewerInner({ file, title, workspaceSwitch }: PdfView
         <p className="mt-3 rounded-md border border-amber-200 bg-amber-50 px-3 py-2 text-sm text-amber-900">
           {fullscreenError}
         </p>
+      ) : null}
+      {readerContext && !isFullscreen ? (
+        <div className="mt-2 shrink-0">{readerContext}</div>
       ) : null}
 
       {loadError ? (

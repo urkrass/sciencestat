@@ -5,6 +5,8 @@ export const unit05ExerciseSet: ExerciseSet = {
   title: "Interactive exercises",
   intro:
     "Use these checks to test whether you can interpret p-values and confidence intervals without reversing the logic.",
+  conceptIds: ["p-values", "confidence-intervals", "model-assumptions"],
+  recommendedSimulationSlugs: ["confidence-intervals", "p-value-null-model"],
   exercises: [
     {
       id: "unit05-pvalue-meaning",

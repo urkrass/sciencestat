@@ -39,6 +39,7 @@ import {
   buildCsvFromRows,
   SimulationExportButtons
 } from "@/components/simulations/SimulationExportButtons";
+import { SimulationLabShell } from "@/components/simulations/SimulationLabShell";
 import {
   buildPValueComparisonResult,
   createPValueComparisonResult,
@@ -617,10 +618,7 @@ export function PValueNullModelSimulation() {
       : null;
 
     return (
-      <div
-        aria-busy={isComparisonRunning}
-        className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_15rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_20rem]"
-      >
+      <SimulationLabShell isBusy={isComparisonRunning} resultColumn="wide">
         <SimulationActivityPanel
           prompt="Predict which observed mean will look rarer under the null model, then run both scenarios."
           modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
@@ -873,15 +871,12 @@ export function PValueNullModelSimulation() {
             />
           </div>
         </aside>
-      </div>
+      </SimulationLabShell>
     );
   }
 
   return (
-    <div
-      aria-busy={isRunning}
-      className="block h-full min-h-0 overflow-y-auto rounded-lg border border-line bg-white shadow-sm min-[960px]:grid min-[960px]:grid-cols-[13rem_minmax(0,1fr)_13rem] min-[960px]:overflow-hidden xl:grid-cols-[17rem_minmax(0,1fr)_18rem]"
-    >
+    <SimulationLabShell isBusy={isRunning}>
       <SimulationActivityPanel
         prompt="Move the observation, run the null model, then see how much simulated tail area remains."
         modeSwitch={<GuidedModeSwitch mode={mode} onChange={setMode} compact />}
@@ -1140,6 +1135,6 @@ export function PValueNullModelSimulation() {
           </p>
         </section>
       </aside>
-    </div>
+    </SimulationLabShell>
   );
 }

@@ -1,3 +1,13 @@
+import type { ConceptId } from "@/content/concepts";
+
+export type PracticeKind = "conceptual" | "claim" | "output";
+
+export type ExerciseMetadata = {
+  conceptIds?: ConceptId[];
+  misconceptionTags?: string[];
+  practiceKind?: PracticeKind;
+};
+
 export type MultipleChoiceExercise = {
   id: string;
   type: "multipleChoice";
@@ -6,7 +16,7 @@ export type MultipleChoiceExercise = {
   options: string[];
   correctIndex: number;
   explanation: string;
-};
+} & ExerciseMetadata;
 
 export type TrueFalseExercise = {
   id: string;
@@ -15,7 +25,7 @@ export type TrueFalseExercise = {
   prompt: string;
   correctAnswer: boolean;
   explanation: string;
-};
+} & ExerciseMetadata;
 
 export type NumericExercise = {
   id: string;
@@ -26,7 +36,7 @@ export type NumericExercise = {
   tolerance: number;
   unitLabel?: string;
   explanation: string;
-};
+} & ExerciseMetadata;
 
 export type ClaimClassification = {
   text: string;
@@ -41,7 +51,7 @@ export type ClaimClassifierExercise = {
   prompt: string;
   labels: string[];
   claims: ClaimClassification[];
-};
+} & ExerciseMetadata;
 
 export type Exercise =
   | MultipleChoiceExercise
@@ -53,5 +63,7 @@ export type ExerciseSet = {
   unitSlug: string;
   title: string;
   intro: string;
+  conceptIds?: ConceptId[];
+  recommendedSimulationSlugs?: string[];
   exercises: Exercise[];
 };
