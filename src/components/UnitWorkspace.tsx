@@ -3,15 +3,17 @@
 import { useState } from "react";
 import { ExerciseBlock } from "@/components/exercises/ExerciseBlock";
 import { PdfViewerShell } from "@/components/PdfViewerShell";
-import { UnitReaderGuide } from "@/components/UnitReaderGuide";
+import {
+  UnitReaderGuide,
+  type UnitReaderGuideUnit
+} from "@/components/UnitReaderGuide";
 import type { ExerciseSet } from "@/content/exercises";
-import type { StatisticsUnit } from "@/content/statisticsUnits";
 
 type WorkspaceTab = "reader" | "practice";
 
 type UnitWorkspaceProps = {
   exerciseSet: ExerciseSet | null;
-  unit: StatisticsUnit;
+  unit: UnitReaderGuideUnit;
 };
 
 const modeButtonClass =

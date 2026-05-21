@@ -1,6 +1,12 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import { Activity, ArrowRight, BookOpen, CheckCircle2 } from "lucide-react";
+import {
+  Activity,
+  ArrowLeft,
+  ArrowRight,
+  BookOpen,
+  CheckCircle2
+} from "lucide-react";
 import { UnitCard } from "@/components/UnitCard";
 import { getExerciseSetForUnit } from "@/content/exercises";
 import { simulations } from "@/content/simulations";
@@ -9,7 +15,7 @@ import { statisticsUnits } from "@/content/statisticsUnits";
 export const metadata: Metadata = {
   title: "Statistics for Scientific Claims",
   description:
-    "Lecture notes and printable PDFs for scientific data analysis, statistics, and evidence reasoning in IB Biology and Chemistry."
+    "Biology-focused lecture notes and printable PDFs for scientific data analysis, statistics, and evidence reasoning."
 };
 
 export default function CoursePage() {
@@ -24,10 +30,17 @@ export default function CoursePage() {
   return (
     <main className="mx-auto h-dvh w-full max-w-7xl overflow-y-auto overflow-x-hidden px-4 py-5 sm:px-6 lg:px-8">
       <section className="border-b border-line pb-5">
-        <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+        <Link
+          href="/"
+          className="inline-flex items-center gap-1.5 text-sm font-medium text-slate-500 hover:text-moss"
+        >
+          <ArrowLeft aria-hidden="true" className="h-4 w-4" />
+          Subject choice
+        </Link>
+        <div className="mt-3 flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
           <div>
             <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-              Learning path
+              Biology learning path
             </p>
             <h1 className="heading-serif mt-1 max-w-4xl text-3xl font-semibold leading-tight text-ink sm:text-4xl">
               Statistics for Scientific Claims

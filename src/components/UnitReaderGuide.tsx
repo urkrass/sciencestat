@@ -1,8 +1,17 @@
 import { ConceptChipList } from "@/components/ConceptChipList";
-import type { StatisticsUnit } from "@/content/statisticsUnits";
+import type { ConceptId } from "@/content/concepts";
+
+export type UnitReaderGuideUnit = {
+  title: string;
+  pdfPath: string;
+  keyIdea: string;
+  commonMisconception: string;
+  tryNext: string;
+  conceptIds: ConceptId[];
+};
 
 type UnitReaderGuideProps = {
-  unit: StatisticsUnit;
+  unit: UnitReaderGuideUnit;
 };
 
 export function UnitReaderGuide({ unit }: UnitReaderGuideProps) {
