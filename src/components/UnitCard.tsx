@@ -10,7 +10,7 @@ type UnitCardProps = {
 };
 
 const baseButtonClass =
-  "inline-flex h-8 items-center justify-center gap-1.5 rounded-md border px-2.5 text-xs font-medium transition";
+  "inline-flex h-9 items-center justify-center gap-1.5 rounded-md border px-3 text-sm font-medium transition";
 
 export function UnitCard({ unit }: UnitCardProps) {
   const unitHref = `/courses/statistics-for-scientific-claims/${unit.slug}`;
@@ -20,23 +20,21 @@ export function UnitCard({ unit }: UnitCardProps) {
     .find((simulation) => simulation?.status === "available" && simulation.href);
 
   return (
-    <article className="grid gap-4 border-b border-line bg-white/70 py-4 last:border-b-0 md:grid-cols-[1fr_auto] md:items-center">
+    <article className="border-b border-line py-5 last:border-b-0">
       <div className="min-w-0">
-        <div className="flex flex-wrap items-start gap-3">
-          <div className="min-w-0">
-            <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
-              Unit {String(unit.number).padStart(2, "0")}
-            </p>
-            <h2 className="mt-1 text-lg font-semibold leading-snug text-ink">
-              {unit.title}
-            </h2>
-          </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <p className="text-xs font-semibold uppercase tracking-[0.14em] text-moss">
+            Unit {String(unit.number).padStart(2, "0")}
+          </p>
           {hasExercises ? (
             <span className="inline-flex rounded-full border border-moss/30 bg-moss/10 px-2 py-0.5 text-[0.68rem] font-semibold uppercase tracking-[0.12em] text-moss">
               Practice
             </span>
           ) : null}
         </div>
+        <h2 className="mt-2 text-xl font-semibold leading-snug text-ink">
+          {unit.title}
+        </h2>
         <p className="mt-2 max-w-3xl text-sm leading-6 text-slate-600">
           {unit.description}
         </p>
@@ -44,12 +42,12 @@ export function UnitCard({ unit }: UnitCardProps) {
           <ConceptChipList conceptIds={unit.conceptIds} compact />
         </div>
       </div>
-      <div className="flex flex-wrap gap-2 md:justify-end">
+      <div className="mt-4 flex flex-wrap gap-2">
         <Link
           href={unitHref}
           className={`${baseButtonClass} border-moss bg-moss text-white hover:bg-moss-dark`}
         >
-          Open <ArrowRight aria-hidden="true" className="h-4 w-4" />
+          Open unit <ArrowRight aria-hidden="true" className="h-4 w-4" />
         </Link>
         {relatedSimulation?.href ? (
           <Link
