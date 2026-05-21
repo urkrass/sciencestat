@@ -2,6 +2,7 @@ node_modules
 .codex-npm
 .codex-npm.tgz
 /unit*_statistics_for_scientific_claims.pdf
+/chemistry/
 .next
 out
 .vercel
