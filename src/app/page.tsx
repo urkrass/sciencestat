@@ -1,5 +1,4 @@
 import type { Metadata } from "next";
-import { FlaskConical, Microscope } from "lucide-react";
 import { SubjectChoiceCard } from "@/components/SubjectChoiceCard";
 
 export const metadata: Metadata = {
@@ -32,14 +31,16 @@ export default function HomePage() {
       >
         <SubjectChoiceCard
           href="/courses/statistics-for-scientific-claims"
-          icon={Microscope}
+          iconAlt="DNA helix icon"
+          iconSrc="/icons/noto-emoji/dna.svg"
           label="Biology"
           title="Biology"
           description="Use the existing IB DP Biology-focused sequence on measurement, uncertainty, experimental design, inference, models, and statistical conclusions."
         />
         <SubjectChoiceCard
           href="/courses/statistics-for-scientific-claims/chemistry"
-          icon={FlaskConical}
+          iconAlt="Test tube icon"
+          iconSrc="/icons/noto-emoji/test-tube.svg"
           label="Chemistry"
           title="Chemistry"
           description="Open the chemistry statistical methods reader: uncertainty, repeats, calibration, method validation, reporting, and chemistry worksheets."
